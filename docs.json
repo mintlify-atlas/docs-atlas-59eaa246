@@ -26,7 +26,7 @@
         "groups": [
           {
             "group": "Getting Started",
-            "pages": ["introduction", "quickstart", "installation"]
+            "pages": ["index", "quickstart", "installation"]
           },
           {
             "group": "Core Concepts",
