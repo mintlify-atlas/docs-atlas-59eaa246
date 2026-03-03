@@ -1,0 +1,127 @@
+{
+  "projectType": "frontend",
+  "projectName": "Animation Playground",
+  "projectDescription": "An interactive learning platform for web animations featuring CSS, JavaScript, and React animation techniques with hands-on examples and real-time playgrounds.",
+  "theme": "palm",
+  "primaryColor": "#3B82F6",
+  "lightColor": "#60A5FA",
+  "darkColor": "#2563EB",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": ["introduction", "quickstart", "installation"]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/transforms",
+              "concepts/timing-functions",
+              "concepts/keyframes",
+              "concepts/performance"
+            ]
+          },
+          {
+            "group": "Animation Techniques",
+            "pages": [
+              "techniques/css-animations",
+              "techniques/javascript-animations",
+              "techniques/react-animations",
+              "techniques/advanced-animations"
+            ]
+          },
+          {
+            "group": "Interactive Tools",
+            "pages": [
+              "tools/playground",
+              "tools/animation-comparison",
+              "tools/performance-metrics",
+              "tools/challenges"
+            ]
+          },
+          {
+            "group": "Libraries & Frameworks",
+            "pages": [
+              "libraries/framer-motion",
+              "libraries/react-spring",
+              "libraries/gsap",
+              "libraries/react-transition-group"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Examples",
+        "groups": [
+          {
+            "group": "Basic Examples",
+            "pages": [
+              "examples/fade-in",
+              "examples/slide-in",
+              "examples/rotate",
+              "examples/scale"
+            ]
+          },
+          {
+            "group": "Advanced Examples",
+            "pages": [
+              "examples/bounce",
+              "examples/pulse",
+              "examples/morph",
+              "examples/drag-gesture",
+              "examples/scroll-animation"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "Components",
+            "pages": [
+              "reference/transform-demo",
+              "reference/timing-demo",
+              "reference/animation-playground",
+              "reference/performance-metrics"
+            ]
+          },
+          {
+            "group": "Best Practices",
+            "pages": [
+              "reference/accessibility",
+              "reference/optimization",
+              "reference/browser-support"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Interactive animation playground with real-time CSS editing",
+    "Comprehensive examples using CSS, JavaScript, and React libraries",
+    "Performance metrics and FPS monitoring",
+    "Side-by-side library comparisons (Framer Motion, React Spring, GSAP)",
+    "Transform and timing function demonstrations",
+    "Animation challenges for learning",
+    "Drag and gesture-based animations",
+    "Scroll-based animation examples",
+    "Accessibility controls and reduced motion support"
+  ],
+  "publicApiSurface": [
+    "TransformDemo - Interactive transform properties demonstration",
+    "TimingDemo - Timing function comparisons",
+    "AdvancedAnimations - Complex animation combinations",
+    "CSSAnimations - Pure CSS animation examples with code generation",
+    "JavaScriptAnimations - JavaScript and GSAP animations",
+    "ReactAnimations - Framer Motion and React Spring examples",
+    "AnimationPlayground - Keyframe timeline editor",
+    "AnimationComparison - Side-by-side technique comparison",
+    "AnimationChallenges - Interactive learning challenges",
+    "PerformanceMetrics - Real-time FPS tracking and monitoring"
+  ]
+}
