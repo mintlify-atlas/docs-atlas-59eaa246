@@ -1,0 +1,396 @@
+---
+title: Rotation animation
+description: Create spinning and rotating animations for loading indicators, icons, and interactive elements
+---
+
+## Live demo
+
+Rotation animations add dynamic motion by spinning elements around their center point. They're commonly used for loading spinners, interactive icons, and attention-grabbing effects.
+
+<Note>
+  Continuous rotations work best with infinite loops, while discrete rotations (90°, 180°) are great for interactive elements.
+</Note>
+
+## Complete code example
+
+<Tabs>
+  <Tab title="Framer Motion">
+    ```tsx
+    import { motion } from 'framer-motion'
+    import { useState } from 'react'
+
+    export default function RotateDemo() {
+      const [rotationSpeed, setRotationSpeed] = useState(2)
+
+      return (
+        <div>
+          <label className="block mb-4">
+            Rotation Speed: {rotationSpeed}s
+            <input
+              type="range"
+              min="0.5"
+              max="5"
+              step="0.5"
+              value={rotationSpeed}
+              onChange={(e) => setRotationSpeed(parseFloat(e.target.value))}
+              className="w-full"
+            />
+          </label>
+
+          <motion.div
+            animate={{
+              rotate: [0, 180, 0],
+              scale: [1, 1.2, 1]
+            }}
+            transition={{
+              duration: rotationSpeed,
+              ease: 'easeInOut',
+              repeat: Infinity,
+              repeatDelay: 0.5
+            }}
+            className="w-32 h-32 bg-blue-500 mx-auto"
+          />
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="GSAP">
+    ```tsx
+    import { useRef, useEffect, useState } from 'react'
+    import gsap from 'gsap'
+
+    export default function RotateDemo() {
+      const boxRef = useRef<HTMLDivElement>(null)
+      const [isAnimating, setIsAnimating] = useState(false)
+
+      const startRotation = () => {
+        if (!boxRef.current) return
+        setIsAnimating(true)
+        
+        gsap.to(boxRef.current, {
+          rotation: 360,
+          duration: 2,
+          ease: 'linear',
+          repeat: -1
+        })
+      }
+
+      const stopRotation = () => {
+        if (!boxRef.current) return
+        gsap.killTweensOf(boxRef.current)
+        setIsAnimating(false)
+      }
+
+      return (
+        <div>
+          <div
+            ref={boxRef}
+            className="w-32 h-32 bg-green-500 mx-auto mb-4"
+          />
+          
+          <button
+            onClick={isAnimating ? stopRotation : startRotation}
+            className="px-4 py-2 bg-green-500 text-white rounded"
+          >
+            {isAnimating ? 'Stop' : 'Start'} Rotation
+          </button>
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="CSS">
+    ```tsx
+    import './rotate.css'
+
+    export default function RotateDemo() {
+      return (
+        <div className="flex flex-col items-center gap-8">
+          <div className="rotate-continuous w-32 h-32 bg-purple-500" />
+          <div className="rotate-discrete w-32 h-32 bg-pink-500" />
+        </div>
+      )
+    }
+    ```
+    
+    ```css rotate.css
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes rotate-discrete {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(180deg); }
+    }
+
+    .rotate-continuous {
+      animation: rotate 3s linear infinite;
+    }
+
+    .rotate-discrete {
+      animation: rotate-discrete 2s ease-in-out infinite;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## How it works
+
+Rotation animations use the CSS `rotate` or `transform: rotate()` property:
+
+<Steps>
+  <Step title="Set rotation angle">
+    Define the target rotation in degrees (0-360°) or radians.
+  </Step>
+  
+  <Step title="Choose timing function">
+    Use `linear` for continuous spins or `ease-in-out` for smoother starts/stops.
+  </Step>
+  
+  <Step title="Set repeat behavior">
+    Decide if the animation should loop infinitely or play once.
+  </Step>
+</Steps>
+
+### Rotation types
+
+<CardGroup cols={2}>
+  <Card title="Continuous spin" icon="spinner">
+    360° rotation with linear timing, infinite repeat. Perfect for loading indicators.
+  </Card>
+  
+  <Card title="Discrete rotation" icon="rotate">
+    Fixed angle rotations (90°, 180°) with easing. Great for interactive elements.
+  </Card>
+  
+  <Card title="Wobble rotation" icon="wave-square">
+    Back-and-forth rotation using negative values. Creates attention-grabbing effect.
+  </Card>
+  
+  <Card title="Combined rotation" icon="layer-group">
+    Rotation combined with other transforms like scale or translate.
+  </Card>
+</CardGroup>
+
+## Variations
+
+### Loading spinner
+
+Classic loading indicator with rotation:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function LoadingSpinner() {
+  return (
+    <motion.div
+      animate={{ rotate: 360 }}
+      transition={{
+        duration: 1,
+        repeat: Infinity,
+        ease: 'linear'
+      }}
+      className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"
+    />
+  )
+}
+```
+
+### Rotate on hover
+
+Interactive rotation triggered by hover:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function RotateOnHover() {
+  return (
+    <motion.button
+      whileHover={{ rotate: 180 }}
+      transition={{ duration: 0.3 }}
+      className="p-4 bg-blue-500 text-white rounded-lg"
+    >
+      Hover Me
+    </motion.button>
+  )
+}
+```
+
+### 3D rotation
+
+Rotate on multiple axes for 3D effect:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function Rotate3D() {
+  return (
+    <motion.div
+      animate={{
+        rotateY: [0, 360],
+        rotateX: [0, 180, 0]
+      }}
+      transition={{
+        duration: 3,
+        repeat: Infinity,
+        ease: 'easeInOut'
+      }}
+      style={{ transformStyle: 'preserve-3d' }}
+      className="w-32 h-32 bg-gradient-to-r from-purple-500 to-pink-500"
+    />
+  )
+}
+```
+
+### Wobble effect
+
+Back-and-forth rotation for attention:
+
+```tsx
+<motion.div
+  animate={{ rotate: [-5, 5, -5] }}
+  transition={{
+    duration: 0.5,
+    repeat: Infinity,
+    repeatType: 'reverse'
+  }}
+>
+  Notification Badge
+</motion.div>
+```
+
+## Example from the playground
+
+This code is extracted from the Animation Playground's ReactAnimations component:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+function RotationPlayground() {
+  const [rotationSpeed, setRotationSpeed] = useState(2)
+  const [scaleAmount, setScaleAmount] = useState(1.2)
+
+  return (
+    <div>
+      <div className="flex gap-4 mb-4">
+        <label>
+          Rotation Speed: {rotationSpeed}s
+          <input
+            type="range"
+            min="0.5"
+            max="5"
+            step="0.5"
+            value={rotationSpeed}
+            onChange={(e) => setRotationSpeed(parseFloat(e.target.value))}
+          />
+        </label>
+        <label>
+          Scale: {scaleAmount}x
+          <input
+            type="range"
+            min="1"
+            max="2"
+            step="0.1"
+            value={scaleAmount}
+            onChange={(e) => setScaleAmount(parseFloat(e.target.value))}
+          />
+        </label>
+      </div>
+      
+      <motion.div
+        animate={{
+          scale: [1, scaleAmount, 1],
+          rotate: [0, 180, 0],
+          borderRadius: ['0%', '50%', '0%']
+        }}
+        transition={{
+          duration: rotationSpeed,
+          ease: 'easeInOut',
+          repeat: Infinity,
+          repeatDelay: 0.5
+        }}
+        className="w-32 h-32 bg-blue-500 mx-auto cursor-pointer"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      />
+    </div>
+  )
+}
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Use transform origin">
+    Set `transform-origin` to control the rotation pivot point. Default is center.
+    
+    ```tsx
+    <motion.div
+      animate={{ rotate: 90 }}
+      style={{ transformOrigin: 'top left' }}
+    />
+    ```
+  </Accordion>
+  
+  <Accordion title="Choose appropriate easing">
+    - `linear`: Continuous, mechanical rotations
+    - `ease-in-out`: Natural starts and stops
+    - `spring`: Bouncy, playful rotations
+  </Accordion>
+  
+  <Accordion title="Avoid excessive rotation">
+    Too much rotation can cause motion sickness. Use sparingly and respect `prefers-reduced-motion`.
+  </Accordion>
+  
+  <Accordion title="Combine with other transforms">
+    Rotation works great with scale and translate for more dynamic animations.
+  </Accordion>
+</AccordionGroup>
+
+## Common use cases
+
+- Loading spinners and progress indicators
+- Refresh/reload buttons
+- Expand/collapse icons (chevrons)
+- Animated logos
+- Card flips
+- Gear/cog animations
+- Success/error indicators
+
+## Performance tips
+
+<Warning>
+  Rotation using `transform: rotate()` is GPU-accelerated. Avoid using deprecated rotation properties.
+</Warning>
+
+```tsx
+// Good - GPU accelerated
+<motion.div animate={{ rotate: 360 }} />
+
+// Also good - 3D rotation
+<motion.div animate={{ rotateY: 360 }} />
+
+// Avoid - not standard
+<motion.div style={{ rotation: 360 }} />
+```
+
+## Related examples
+
+<CardGroup cols={3}>
+  <Card title="Scale" icon="expand" href="/examples/scale">
+    Grow and shrink animations
+  </Card>
+  
+  <Card title="Bounce" icon="basketball" href="/examples/bounce">
+    Bouncing motion effects
+  </Card>
+  
+  <Card title="Morph" icon="shapes" href="/examples/morph">
+    Shape transformations
+  </Card>
+</CardGroup>

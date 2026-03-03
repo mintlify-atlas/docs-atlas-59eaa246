@@ -1,122 +1,117 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Animation Playground",
+  "theme": "palm",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#3B82F6",
+    "light": "#60A5FA",
+    "dark": "#2563EB"
   },
   "favicon": "/favicon.svg",
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/Aduwoayooluwa/animations"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/Aduwoayooluwa/animations"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Getting Started",
+            "pages": ["introduction", "quickstart", "installation"]
+          },
+          {
+            "group": "Core Concepts",
             "pages": [
-              "index",
-              "quickstart",
-              "development"
+              "concepts/transforms",
+              "concepts/timing-functions",
+              "concepts/keyframes",
+              "concepts/performance"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Animation Techniques",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "techniques/css-animations",
+              "techniques/javascript-animations",
+              "techniques/react-animations",
+              "techniques/advanced-animations"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Interactive Tools",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "tools/playground",
+              "tools/animation-comparison",
+              "tools/performance-metrics",
+              "tools/challenges"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Libraries & Frameworks",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "libraries/framer-motion",
+              "libraries/react-spring",
+              "libraries/gsap",
+              "libraries/react-transition-group"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "Examples",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Basic Examples",
             "pages": [
-              "api-reference/introduction"
+              "examples/fade-in",
+              "examples/slide-in",
+              "examples/rotate",
+              "examples/scale"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Advanced Examples",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "examples/bounce",
+              "examples/pulse",
+              "examples/morph",
+              "examples/drag-gesture",
+              "examples/scroll-animation"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "Components",
+            "pages": [
+              "reference/transform-demo",
+              "reference/timing-demo",
+              "reference/animation-playground",
+              "reference/performance-metrics"
+            ]
+          },
+          {
+            "group": "Best Practices",
+            "pages": [
+              "reference/accessibility",
+              "reference/optimization",
+              "reference/browser-support"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    ]
   }
 }

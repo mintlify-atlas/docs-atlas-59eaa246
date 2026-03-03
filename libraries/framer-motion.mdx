@@ -1,0 +1,225 @@
+---
+title: Framer Motion
+description: A production-ready motion library for React with a simple declarative API for animations and gestures
+---
+
+## Installation
+
+Install Framer Motion via npm or yarn:
+
+<CodeGroup>
+```bash npm
+npm install framer-motion
+```
+
+```bash yarn
+yarn add framer-motion
+```
+
+```bash pnpm
+pnpm add framer-motion
+```
+</CodeGroup>
+
+## Basic usage
+
+Framer Motion provides a simple yet powerful API for React animations. The core component is `motion`, which can be applied to any HTML or SVG element.
+
+```tsx
+import { motion } from 'framer-motion'
+
+export default function BasicAnimation() {
+  return (
+    <motion.div
+      animate={{
+        scale: [1, 1.2, 1],
+        rotate: [0, 180, 0]
+      }}
+      transition={{
+        duration: 2,
+        ease: "easeInOut",
+        repeat: Infinity
+      }}
+      className="w-32 h-32 bg-blue-500"
+    />
+  )
+}
+```
+
+### Hover and tap gestures
+
+Add interactive animations that respond to user input:
+
+```tsx
+<motion.div
+  whileHover={{ scale: 1.1 }}
+  whileTap={{ scale: 0.9 }}
+  className="w-32 h-32 bg-blue-500 rounded-lg"
+/>
+```
+
+### Exit animations with AnimatePresence
+
+Animate components when they're removed from the React tree:
+
+```tsx
+import { motion, AnimatePresence } from 'framer-motion'
+
+function Component({ isVisible }) {
+  return (
+    <AnimatePresence mode="wait">
+      {isVisible && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+        />
+      )}
+    </AnimatePresence>
+  )
+}
+```
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Declarative API" icon="code">
+    Define animations directly in your JSX with intuitive props like `animate`, `initial`, and `exit`.
+  </Card>
+  
+  <Card title="Gesture support" icon="hand-pointer">
+    Built-in support for drag, hover, tap, and pan gestures with `whileHover`, `whileTap`, and `drag` props.
+  </Card>
+  
+  <Card title="Spring physics" icon="wave-square">
+    Natural-feeling animations using spring physics with customizable stiffness and damping.
+  </Card>
+  
+  <Card title="Motion values" icon="gauge">
+    Create linked animations with `useMotionValue` and `useTransform` for advanced effects.
+  </Card>
+</CardGroup>
+
+### Drag gestures
+
+Create draggable elements with constraints and elastic behavior:
+
+```tsx
+import { motion, useMotionValue, useTransform } from 'framer-motion'
+
+function DragDemo() {
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const rotate = useTransform(x, [-100, 100], [-30, 30])
+  const scale = useTransform(y, [-100, 100], [0.5, 3])
+
+  return (
+    <motion.div
+      drag
+      dragElastic={0.2}
+      dragConstraints={{ top: -100, left: -100, right: 100, bottom: 100 }}
+      style={{ x, y, rotate, scale }}
+      className="w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-500"
+    />
+  )
+}
+```
+
+### Scroll-based animations
+
+Create animations that respond to scroll position:
+
+```tsx
+import { useScroll, useSpring, motion } from 'framer-motion'
+
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  })
+
+  return (
+    <motion.div
+      style={{ scaleX }}
+      className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left"
+    />
+  )
+}
+```
+
+### Reorderable lists
+
+Build drag-to-reorder lists with smooth animations:
+
+```tsx
+import { Reorder } from 'framer-motion'
+import { useState } from 'react'
+
+function SortableList() {
+  const [items, setItems] = useState(['Item 1', 'Item 2', 'Item 3'])
+
+  return (
+    <Reorder.Group axis="y" values={items} onReorder={setItems}>
+      {items.map((item) => (
+        <Reorder.Item
+          key={item}
+          value={item}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+        >
+          {item}
+        </Reorder.Item>
+      ))}
+    </Reorder.Group>
+  )
+}
+```
+
+## When to use it
+
+<AccordionGroup>
+  <Accordion title="Prototyping and production">
+    Framer Motion excels at both rapid prototyping and production-ready animations. Its declarative API makes it easy to experiment with different animation styles.
+  </Accordion>
+  
+  <Accordion title="Interactive UI components">
+    Perfect for creating interactive components like modals, dropdowns, tooltips, and navigation menus that need smooth enter/exit animations.
+  </Accordion>
+  
+  <Accordion title="Gesture-based interactions">
+    Ideal when you need drag-and-drop functionality, swipeable cards, or other gesture-driven interfaces.
+  </Accordion>
+  
+  <Accordion title="Complex orchestration">
+    Use variants and orchestration features to coordinate multiple animations across different components.
+  </Accordion>
+</AccordionGroup>
+
+## Performance tips
+
+- Use `transform` and `opacity` properties for better performance
+- Enable GPU acceleration with `transform: translateZ(0)`
+- Use `layout` animations for automatic layout transitions
+- Respect `prefers-reduced-motion` for accessibility
+
+```tsx
+<motion.div
+  animate={{ x: 100 }} // GPU accelerated
+  transition={{ duration: 0.5 }}
+/>
+```
+
+## Learn more
+
+<CardGroup cols={2}>
+  <Card title="Animation examples" icon="play" href="/examples/fade-in">
+    Explore practical animation examples
+  </Card>
+  
+  <Card title="Official docs" icon="book" href="https://www.framer.com/motion/">
+    Visit the Framer Motion documentation
+  </Card>
+</CardGroup>

@@ -1,0 +1,532 @@
+---
+title: Animation challenges
+description: Practice animation skills with guided challenges and solutions
+---
+
+The Animation Challenges tool provides hands-on practice for learning web animation techniques. Work through progressive challenges ranging from beginner to advanced, with hints and solutions to guide your learning.
+
+## Overview
+
+Each challenge presents a specific animation task with:
+
+- Clear objectives and requirements
+- Difficulty level (Beginner, Intermediate, Advanced)
+- Progressive hints to guide you
+- Complete solutions with explanations
+- Live preview area to test your work
+- Progress tracking
+
+<Info>
+The challenges are designed to be completed in order, building on concepts from previous challenges.
+</Info>
+
+## Available challenges
+
+The tool currently includes three challenges covering fundamental animation concepts.
+
+### Challenge 1: Smooth button hover
+
+**Difficulty**: Beginner
+
+**Objective**: Create a button that smoothly scales up when the user hovers over it.
+
+**Task**: Add hover animation to make the button scale to 1.1x its size with a smooth transition.
+
+**Concepts covered**:
+- Basic hover interactions
+- Scale transforms
+- Transition timing
+- Easing functions
+
+**Preview**:
+
+```tsx
+<motion.button
+  whileHover={{ scale: 1.1 }}
+  transition={{ duration: 0.2 }}
+  className="px-6 py-3 bg-blue-500 text-white rounded-lg"
+>
+  Hover Me
+</motion.button>
+```
+
+This challenge introduces the fundamentals of interactive animations. The `whileHover` prop automatically handles the hover state, making it simple to add responsive interactions.
+
+<Tip>
+Start with a longer duration (like 0.5s) to clearly see the animation, then reduce it to 0.2s for a snappier feel.
+</Tip>
+
+### Challenge 2: Loading spinner
+
+**Difficulty**: Beginner
+
+**Objective**: Create an infinitely rotating loading spinner.
+
+**Task**: Make a circular element rotate 360 degrees continuously.
+
+**Concepts covered**:
+- Rotation transforms
+- Infinite animations
+- Linear easing
+- Animation loops
+
+**Preview**:
+
+```tsx
+<motion.div
+  animate={{ rotate: 360 }}
+  transition={{ 
+    duration: 2, 
+    repeat: Infinity, 
+    ease: "linear" 
+  }}
+  className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"
+/>
+```
+
+Key learning points:
+
+- **`repeat: Infinity`**: Makes the animation loop continuously
+- **`ease: "linear"`**: Creates constant rotation speed (no acceleration/deceleration)
+- **Border trick**: Using `border-t-transparent` creates the spinner appearance
+
+<Warning>
+Always use linear easing for continuous rotations. Other easing functions create unnatural pause points.
+</Warning>
+
+### Challenge 3: Staggered list items
+
+**Difficulty**: Intermediate
+
+**Objective**: Create a list where items appear one after another with a stagger effect.
+
+**Task**: Animate list items to fade in and slide up with a delay between each item.
+
+**Concepts covered**:
+- Stagger animations
+- Variants pattern
+- Parent-child animation coordination
+- Opacity and position transforms
+
+**Preview**:
+
+```tsx
+<motion.div
+  variants={{
+    container: { 
+      transition: { staggerChildren: 0.1 } 
+    },
+    item: { 
+      opacity: 1, 
+      y: 0 
+    }
+  }}
+  initial="hidden"
+  animate="visible"
+  className="space-y-2"
+>
+  {[1, 2, 3].map((item) => (
+    <motion.div
+      key={item}
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+      }}
+      className="w-32 h-8 bg-blue-500 rounded"
+    />
+  ))}
+</motion.div>
+```
+
+This challenge introduces the variants pattern, a powerful feature of Framer Motion:
+
+**Variants** define named animation states that can be shared across components:
+
+```tsx
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },   // Initial state
+  visible: { opacity: 1, y: 0 }    // Animated state
+}
+```
+
+**StaggerChildren** automatically delays child animations:
+
+```tsx
+const containerVariants = {
+  container: {
+    transition: { 
+      staggerChildren: 0.1  // 0.1s delay between each child
+    }
+  }
+}
+```
+
+## Learning objectives
+
+Each challenge targets specific skills:
+
+### Beginner challenges
+
+<CardGroup cols={2}>
+  <Card title="Understanding transforms" icon="arrows-up-down-left-right">
+    Learn how scale, rotate, and translate affect elements
+  </Card>
+  <Card title="Timing and easing" icon="clock">
+    Master duration and easing for natural motion
+  </Card>
+  <Card title="Interactive states" icon="hand-pointer">
+    Respond to hover, tap, and focus events
+  </Card>
+  <Card title="Infinite loops" icon="arrows-rotate">
+    Create continuous animations for loaders and effects
+  </Card>
+</CardGroup>
+
+### Intermediate challenges
+
+<CardGroup cols={2}>
+  <Card title="Variants pattern" icon="code-branch">
+    Organize complex animations with named states
+  </Card>
+  <Card title="Stagger effects" icon="stairs">
+    Coordinate timing across multiple elements
+  </Card>
+  <Card title="Parent-child coordination" icon="diagram-project">
+    Synchronize animations between components
+  </Card>
+  <Card title="Combining properties" icon="layer-group">
+    Animate multiple properties simultaneously
+  </Card>
+</CardGroup>
+
+### Advanced challenges (Coming soon)
+
+<CardGroup cols={2}>
+  <Card title="Gesture animations" icon="hand">
+    Respond to drag, swipe, and pan gestures
+  </Card>
+  <Card title="Spring physics" icon="leaf">
+    Create natural motion with physics-based animations
+  </Card>
+  <Card title="Path animations" icon="route">
+    Animate along SVG paths
+  </Card>
+  <Card title="Custom easings" icon="wave-square">
+    Build custom easing curves for unique effects
+  </Card>
+</CardGroup>
+
+## Solutions and hints
+
+Each challenge provides progressive support:
+
+### Hint system
+
+Three hints guide you toward the solution without giving it away immediately:
+
+```tsx
+const challenge = {
+  hints: [
+    'Use the scale transform property',           // General direction
+    'Consider using transition duration for smoothness',  // More specific
+    'Think about the ease timing function'        // Final hint
+  ]
+}
+```
+
+Try working through each hint before viewing the solution to maximize learning.
+
+### Solution format
+
+Solutions show the key code needed to complete the challenge:
+
+```tsx
+hover={{ scale: 1.1 }}
+transition={{ duration: 0.2, ease: "easeInOut" }}
+```
+
+The preview area demonstrates the complete implementation in context.
+
+### Understanding solutions
+
+When viewing solutions, focus on:
+
+1. **What properties are animated**: Which CSS properties change?
+2. **What values are used**: Why these specific numbers?
+3. **How timing is controlled**: Duration, easing, delays
+4. **How interactions work**: Event triggers, state management
+
+<Accordion title="Example: Breaking down the button hover solution">
+  ```tsx
+  whileHover={{ scale: 1.1 }}
+  transition={{ duration: 0.2, ease: "easeInOut" }}
+  ```
+  
+  **whileHover={{ scale: 1.1 }}**
+  - `whileHover`: Special prop that triggers on mouse hover
+  - `scale: 1.1`: Enlarges the element to 110% of its original size
+  
+  **transition={{ duration: 0.2, ease: "easeInOut" }}**
+  - `duration: 0.2`: Animation completes in 0.2 seconds (200ms)
+  - `ease: "easeInOut"`: Starts slow, speeds up, then slows down
+  
+  **Why these values?**
+  - 1.1 scale is noticeable but not jarring
+  - 0.2s is quick enough to feel responsive
+  - easeInOut feels natural for hover interactions
+</Accordion>
+
+## Using the challenge interface
+
+The interface is divided into two main sections:
+
+### Challenge list sidebar
+
+The left sidebar shows all available challenges:
+
+```tsx
+<button
+  onClick={() => {
+    setActiveChallengeId(challenge.id)
+    setShowSolution(false)
+  }}
+  className={`w-full text-left p-3 rounded-lg ${
+    activeChallengeId === challenge.id
+      ? 'bg-blue-50 border border-blue-200'
+      : 'hover:bg-gray-50'
+  }`}
+>
+  <div className="flex justify-between items-center">
+    <span className="font-medium">{challenge.title}</span>
+    {completedChallenges.includes(challenge.id) && (
+      <span className="text-green-500">✓</span>
+    )}
+  </div>
+  <span className="text-sm text-gray-500">{challenge.difficulty}</span>
+</button>
+```
+
+Features:
+- Click any challenge to view it
+- Completed challenges show a checkmark
+- Active challenge is highlighted
+- Difficulty level displayed
+
+### Challenge details area
+
+The main area shows:
+
+1. **Challenge header**: Title, description, difficulty badge
+2. **Task description**: What you need to accomplish
+3. **Hints section**: Progressive clues
+4. **Action buttons**: Show Solution, Mark as Completed
+5. **Solution display**: Code example (when revealed)
+6. **Preview area**: Live demonstration of the working solution
+
+### Progress tracking
+
+Track your progress with the progress bar:
+
+```tsx
+<div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+  <div
+    className="h-full bg-blue-500 transition-all duration-300"
+    style={{
+      width: `${(completedChallenges.length / challenges.length) * 100}%`
+    }}
+  />
+</div>
+<span className="text-sm text-gray-600">
+  {completedChallenges.length}/{challenges.length}
+</span>
+```
+
+The progress bar fills as you complete challenges, providing visual feedback on your learning journey.
+
+## Working through challenges
+
+Follow this workflow for effective learning:
+
+<Steps>
+  <Step title="Read the task carefully">
+    Understand exactly what animation you need to create before looking at hints.
+  </Step>
+  
+  <Step title="Attempt the challenge">
+    Try implementing the animation in your own project or code editor based on the task description.
+  </Step>
+  
+  <Step title="Use hints progressively">
+    If stuck, read the first hint. Try again before moving to the next hint.
+  </Step>
+  
+  <Step title="Study the solution">
+    When ready, reveal the solution and compare it to your approach. Understand why each part works.
+  </Step>
+  
+  <Step title="Experiment with variations">
+    Modify the solution to create different effects. Try different values, timings, and properties.
+  </Step>
+  
+  <Step title="Mark as completed">
+    Once you understand the challenge and can implement it confidently, mark it complete.
+  </Step>
+</Steps>
+
+<Tip>
+Don't just copy the solution. Type it out yourself to build muscle memory and understanding.
+</Tip>
+
+## Practice strategies
+
+### Deliberate practice
+
+Instead of rushing through challenges:
+
+1. **Complete challenges multiple times**: Implement the same animation in different contexts
+2. **Modify parameters**: Change durations, easings, and values to see effects
+3. **Combine techniques**: Mix concepts from multiple challenges
+4. **Build variations**: Create similar but unique animations
+
+### Apply to real projects
+
+Reinforce learning by using challenge concepts in actual projects:
+
+- **Button hover** → Navigation buttons, CTAs, cards
+- **Loading spinner** → Page loaders, async operation indicators  
+- **Staggered lists** → Menu animations, card grids, notification stacks
+
+### Create your own challenges
+
+Once comfortable with the provided challenges, create your own:
+
+```tsx
+const myChallenge = {
+  title: 'Pulse notification',
+  task: 'Create a notification dot that pulses to grab attention',
+  hints: [
+    'Use scale animation',
+    'Animate opacity as well',
+    'Use repeat: Infinity'
+  ],
+  solution: `
+    animate={{ 
+      scale: [1, 1.2, 1], 
+      opacity: [1, 0.7, 1] 
+    }}
+    transition={{ 
+      duration: 1.5, 
+      repeat: Infinity 
+    }}
+  `
+}
+```
+
+## Extending challenges
+
+The challenge system is designed to be extensible:
+
+```tsx
+type Challenge = {
+  id: string
+  title: string
+  description: string
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced'
+  task: string
+  hints: string[]
+  solution: string
+  completed: boolean
+}
+```
+
+Add new challenges by extending the challenges array:
+
+```tsx
+const challenges: Challenge[] = [
+  // Existing challenges...
+  {
+    id: '4',
+    title: 'Card flip',
+    description: 'Create a card that flips to reveal content on the back',
+    difficulty: 'Intermediate',
+    task: 'Animate a 3D card flip on click',
+    hints: [
+      'Use rotateY for 3D rotation',
+      'Consider perspective for depth',
+      'Animate both card faces'
+    ],
+    solution: `animate={{ rotateY: isFlipped ? 180 : 0 }}
+transition={{ duration: 0.6 }}
+style={{ transformStyle: 'preserve-3d' }}`,
+    completed: false
+  }
+]
+```
+
+## Common mistakes to avoid
+
+<AccordionGroup>
+  <Accordion title="Skipping hints to see the solution">
+    Hints are designed to guide your thinking. Jumping straight to the solution reduces learning effectiveness.
+  </Accordion>
+  
+  <Accordion title="Not experimenting with values">
+    The provided solutions use specific values, but understanding why requires experimentation. Try different numbers.
+  </Accordion>
+  
+  <Accordion title="Marking challenges complete without understanding">
+    Progress tracking is for you. Only mark challenges complete when you can confidently implement them.
+  </Accordion>
+  
+  <Accordion title="Working in isolation">
+    Apply challenge concepts to real projects to cement learning and build portfolio pieces.
+  </Accordion>
+</AccordionGroup>
+
+## Challenge difficulty progression
+
+Challenges increase in complexity:
+
+### Beginner (Challenges 1-2)
+
+- Single property animations
+- Simple timing control
+- Basic interactions
+- Minimal configuration
+
+### Intermediate (Challenge 3)
+
+- Multiple properties
+- Coordination between elements
+- Variants pattern
+- Parent-child relationships
+
+### Advanced (Coming)
+
+- Complex gestures
+- Physics-based motion
+- Path animations
+- Custom timing curves
+
+<Info>
+More challenges are being added regularly. Check back for new content covering advanced topics.
+</Info>
+
+## Next steps
+
+After completing challenges:
+
+<CardGroup cols={2}>
+  <Card title="Animation playground" icon="wand-magic-sparkles" href="/tools/playground">
+    Create custom animations with the timeline editor
+  </Card>
+  <Card title="Performance metrics" icon="gauge" href="/tools/performance-metrics">
+    Optimize your animations for smooth performance
+  </Card>
+  <Card title="Animation comparison" icon="code-compare" href="/tools/animation-comparison">
+    Understand different animation techniques
+  </Card>
+  <Card title="Build your own project" icon="hammer">
+    Apply your skills to create unique animated experiences
+  </Card>
+</CardGroup>

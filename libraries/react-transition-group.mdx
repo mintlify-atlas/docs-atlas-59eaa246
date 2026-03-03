@@ -1,0 +1,337 @@
+---
+title: React Transition Group
+description: A low-level animation library for managing component enter and exit transitions in React
+---
+
+## Installation
+
+Install React Transition Group via npm or yarn:
+
+<CodeGroup>
+```bash npm
+npm install react-transition-group
+```
+
+```bash yarn
+yarn add react-transition-group
+```
+
+```bash pnpm
+pnpm add react-transition-group
+```
+</CodeGroup>
+
+For TypeScript projects, also install type definitions:
+
+```bash
+npm install --save-dev @types/react-transition-group
+```
+
+## Basic usage
+
+React Transition Group provides low-level components for managing transitions. It doesn't animate styles directly but exposes transition stages you can hook into.
+
+### CSSTransition
+
+The most commonly used component, which applies CSS classes at different stages:
+
+```tsx
+import { CSSTransition } from 'react-transition-group'
+import { useState } from 'react'
+import './styles.css'
+
+function FadeTransition() {
+  const [show, setShow] = useState(false)
+
+  return (
+    <>
+      <button onClick={() => setShow(!show)}>Toggle</button>
+      
+      <CSSTransition
+        in={show}
+        timeout={300}
+        classNames="fade"
+        unmountOnExit
+      >
+        <div className="box">I will fade in and out</div>
+      </CSSTransition>
+    </>
+  )
+}
+```
+
+Corresponding CSS:
+
+```css styles.css
+/* Entering */
+.fade-enter {
+  opacity: 0;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms;
+}
+
+/* Exiting */
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
+}
+```
+
+### Transition lifecycle
+
+<Tabs>
+  <Tab title="Enter">
+    Applied when component enters:
+    
+    1. `{classNames}-enter` - Initial state
+    2. `{classNames}-enter-active` - Active transition
+    3. `{classNames}-enter-done` - Completed
+  </Tab>
+  
+  <Tab title="Exit">
+    Applied when component exits:
+    
+    1. `{classNames}-exit` - Initial exit state
+    2. `{classNames}-exit-active` - Active exit transition
+    3. `{classNames}-exit-done` - Completed
+  </Tab>
+</Tabs>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="CSS-based" icon="css3">
+    Uses CSS transitions and animations for actual styling, keeping JavaScript minimal.
+  </Card>
+  
+  <Card title="Lifecycle hooks" icon="webhook">
+    Provides callbacks for transition stages: onEnter, onEntering, onEntered, onExit, onExiting, onExited.
+  </Card>
+  
+  <Card title="TransitionGroup" icon="layer-group">
+    Automatically manages transitions for lists of elements.
+  </Card>
+  
+  <Card title="Lightweight" icon="feather">
+    Small footprint focused solely on managing transition states.
+  </Card>
+</CardGroup>
+
+### TransitionGroup for lists
+
+Manage transitions for dynamic lists:
+
+```tsx
+import { TransitionGroup, CSSTransition } from 'react-transition-group'
+import { useState } from 'react'
+
+function TodoList() {
+  const [items, setItems] = useState(['Item 1', 'Item 2'])
+  
+  const addItem = () => {
+    setItems([...items, `Item ${items.length + 1}`])
+  }
+  
+  const removeItem = (index: number) => {
+    setItems(items.filter((_, i) => i !== index))
+  }
+
+  return (
+    <div>
+      <button onClick={addItem}>Add Item</button>
+      
+      <TransitionGroup className="list">
+        {items.map((item, index) => (
+          <CSSTransition
+            key={item}
+            timeout={300}
+            classNames="item"
+          >
+            <div className="item">
+              {item}
+              <button onClick={() => removeItem(index)}>×</button>
+            </div>
+          </CSSTransition>
+        ))}
+      </TransitionGroup>
+    </div>
+  )
+}
+```
+
+### JavaScript-based transitions
+
+Use the base `Transition` component for JavaScript animations:
+
+```tsx
+import { Transition } from 'react-transition-group'
+import { useRef } from 'react'
+
+const duration = 300
+
+const defaultStyle = {
+  transition: `opacity ${duration}ms ease-in-out`,
+  opacity: 0,
+}
+
+const transitionStyles = {
+  entering: { opacity: 1 },
+  entered: { opacity: 1 },
+  exiting: { opacity: 0 },
+  exited: { opacity: 0 },
+}
+
+function Fade({ in: inProp, children }) {
+  const nodeRef = useRef(null)
+  
+  return (
+    <Transition nodeRef={nodeRef} in={inProp} timeout={duration}>
+      {state => (
+        <div ref={nodeRef} style={{
+          ...defaultStyle,
+          ...transitionStyles[state]
+        }}>
+          {children}
+        </div>
+      )}
+    </Transition>
+  )
+}
+```
+
+## Common transition patterns
+
+### Slide in from side
+
+```css
+.slide-enter {
+  transform: translateX(-100%);
+}
+.slide-enter-active {
+  transform: translateX(0);
+  transition: transform 300ms ease-out;
+}
+.slide-exit {
+  transform: translateX(0);
+}
+.slide-exit-active {
+  transform: translateX(100%);
+  transition: transform 300ms ease-in;
+}
+```
+
+### Scale and fade
+
+```css
+.scale-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+.scale-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+.scale-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+.scale-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 300ms, transform 300ms;
+}
+```
+
+## When to use it
+
+<AccordionGroup>
+  <Accordion title="CSS-first approach">
+    Perfect when you prefer writing animations in CSS and just need JavaScript to manage transition timing.
+  </Accordion>
+  
+  <Accordion title="Simple enter/exit transitions">
+    Ideal for basic component mount/unmount animations without complex gesture support.
+  </Accordion>
+  
+  <Accordion title="List animations">
+    Great for animating items being added or removed from lists with TransitionGroup.
+  </Accordion>
+  
+  <Accordion title="Minimal JavaScript">
+    Best when you want to keep animation logic in CSS and minimize JavaScript bundle size.
+  </Accordion>
+  
+  <Accordion title="Legacy projects">
+    Commonly used in older React codebases. Consider Framer Motion for new projects.
+  </Accordion>
+</AccordionGroup>
+
+## Comparison with other libraries
+
+<Tabs>
+  <Tab title="vs Framer Motion">
+    **React Transition Group:**
+    - Lower level, more manual control
+    - CSS-based animations
+    - Smaller bundle size
+    - No built-in gesture support
+    
+    **Framer Motion:**
+    - Higher level, more features
+    - JavaScript-based animations
+    - Built-in gestures and layout animations
+    - More intuitive API
+  </Tab>
+  
+  <Tab title="vs React Spring">
+    **React Transition Group:**
+    - Focuses on transition states
+    - Uses CSS for actual animations
+    - Best for simple transitions
+    
+    **React Spring:**
+    - Physics-based animations
+    - More natural motion
+    - Better for complex interactions
+  </Tab>
+</Tabs>
+
+## Migration tips
+
+If you're using React Transition Group and want to modernize:
+
+<Steps>
+  <Step title="Identify usage">
+    Find all `CSSTransition` and `TransitionGroup` components in your codebase.
+  </Step>
+  
+  <Step title="Choose replacement">
+    Select Framer Motion for UI animations or React Spring for physics-based motion.
+  </Step>
+  
+  <Step title="Migrate gradually">
+    Both libraries can coexist. Migrate component by component.
+  </Step>
+  
+  <Step title="Update tests">
+    Ensure animation tests work with the new library's API.
+  </Step>
+</Steps>
+
+## Learn more
+
+<CardGroup cols={2}>
+  <Card title="Transition examples" icon="play" href="/examples/fade-in">
+    See transition patterns in action
+  </Card>
+  
+  <Card title="Official docs" icon="book" href="https://reactcommunity.org/react-transition-group/">
+    Visit React Transition Group docs
+  </Card>
+</CardGroup>

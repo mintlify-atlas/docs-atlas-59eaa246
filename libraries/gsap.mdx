@@ -1,0 +1,268 @@
+---
+title: GSAP
+description: Professional-grade JavaScript animation library trusted by millions of websites for high-performance animations
+---
+
+## Installation
+
+Install GSAP via npm or yarn:
+
+<CodeGroup>
+```bash npm
+npm install gsap
+```
+
+```bash yarn
+yarn add gsap
+```
+
+```bash pnpm
+pnpm add gsap
+```
+</CodeGroup>
+
+## Basic usage
+
+GSAP (GreenSock Animation Platform) provides a powerful imperative API for creating complex animations. It works with any JavaScript framework or vanilla JS.
+
+```tsx
+import { useRef, useEffect } from 'react'
+import gsap from 'gsap'
+
+function GSAPAnimation() {
+  const boxRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!boxRef.current) return
+
+    gsap.to(boxRef.current, {
+      rotation: 360,
+      scale: 1.5,
+      duration: 1,
+      yoyo: true,
+      repeat: -1,
+      ease: 'power2.inOut'
+    })
+  }, [])
+
+  return <div ref={boxRef} className="w-16 h-16 bg-green-500" />
+}
+```
+
+### Core animation methods
+
+<Tabs>
+  <Tab title="gsap.to()">
+    Animate from current state to defined values.
+    
+    ```tsx
+    gsap.to(element, {
+      x: 100,
+      rotation: 360,
+      duration: 1
+    })
+    ```
+  </Tab>
+  
+  <Tab title="gsap.from()">
+    Animate from defined values to current state.
+    
+    ```tsx
+    gsap.from(element, {
+      opacity: 0,
+      y: -50,
+      duration: 0.5
+    })
+    ```
+  </Tab>
+  
+  <Tab title="gsap.fromTo()">
+    Animate from one state to another.
+    
+    ```tsx
+    gsap.fromTo(element,
+      { opacity: 0, scale: 0 },
+      { opacity: 1, scale: 1, duration: 0.8 }
+    )
+    ```
+  </Tab>
+</Tabs>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Performance" icon="rocket">
+    Ultra-high performance with 60fps animations. Up to 20x faster than jQuery.
+  </Card>
+  
+  <Card title="Easing library" icon="wave-square">
+    Extensive collection of easing functions including elastic, bounce, and custom bezier curves.
+  </Card>
+  
+  <Card title="Timeline" icon="timeline">
+    Sequence and orchestrate complex animations with precise timing control.
+  </Card>
+  
+  <Card title="Cross-browser" icon="browser">
+    Works everywhere, even on older browsers. Handles vendor prefixes automatically.
+  </Card>
+</CardGroup>
+
+### Timeline for complex sequences
+
+Create sophisticated animation sequences:
+
+```tsx
+import { useEffect, useRef } from 'react'
+import gsap from 'gsap'
+
+function TimelineAnimation() {
+  const box1Ref = useRef(null)
+  const box2Ref = useRef(null)
+  const box3Ref = useRef(null)
+
+  useEffect(() => {
+    const tl = gsap.timeline({ repeat: -1, yoyo: true })
+
+    tl.to(box1Ref.current, { x: 100, duration: 1 })
+      .to(box2Ref.current, { x: 100, duration: 1 }, '-=0.5') // Overlap by 0.5s
+      .to(box3Ref.current, { x: 100, duration: 1 }, '<') // Start with previous
+
+    return () => tl.kill()
+  }, [])
+
+  return (
+    <div>
+      <div ref={box1Ref} className="box" />
+      <div ref={box2Ref} className="box" />
+      <div ref={box3Ref} className="box" />
+    </div>
+  )
+}
+```
+
+### Advanced easing
+
+GSAP includes professional easing functions:
+
+```tsx
+gsap.to(element, {
+  x: 100,
+  ease: 'power2.inOut',     // Smooth acceleration/deceleration
+  // ease: 'elastic.out(1, 0.3)',  // Elastic bounce
+  // ease: 'bounce.out',           // Bouncing effect
+  // ease: 'steps(12)',            // Step animation
+  duration: 1
+})
+```
+
+### Controlling animations
+
+GSAP gives you full control over animation playback:
+
+```tsx
+const animation = gsap.to(element, {
+  x: 100,
+  paused: true,  // Start paused
+  duration: 1
+})
+
+// Control playback
+animation.play()
+animation.pause()
+animation.reverse()
+animation.restart()
+animation.seek(0.5)  // Jump to 50% progress
+```
+
+## Example from the playground
+
+Here's the GSAP demo from the Animation Playground:
+
+```tsx
+import { useRef, useState } from 'react'
+import gsap from 'gsap'
+
+export default function GSAPDemo() {
+  const boxRef = useRef<HTMLDivElement>(null)
+  const [isRunning, setIsRunning] = useState(false)
+
+  const startAnimation = () => {
+    if (!boxRef.current) return
+    setIsRunning(true)
+    
+    gsap.to(boxRef.current, {
+      rotation: 360,
+      scale: 1.5,
+      duration: 1,
+      yoyo: true,
+      repeat: 1,
+      ease: 'power2.inOut',
+      onComplete: () => setIsRunning(false)
+    })
+  }
+
+  return (
+    <div>
+      <div ref={boxRef} className="w-16 h-16 bg-green-500 rounded-lg" />
+      <button
+        onClick={startAnimation}
+        disabled={isRunning}
+        className="mt-4 px-4 py-2 bg-green-500 text-white rounded"
+      >
+        Start GSAP Animation
+      </button>
+    </div>
+  )
+}
+```
+
+## When to use it
+
+<AccordionGroup>
+  <Accordion title="Complex animation sequences">
+    GSAP excels at creating complex, orchestrated animation sequences with precise timing control using timelines.
+  </Accordion>
+  
+  <Accordion title="Maximum performance">
+    When you need the absolute best performance for intensive animations, GSAP is the industry standard.
+  </Accordion>
+  
+  <Accordion title="SVG animations">
+    GSAP has exceptional SVG support with plugins for morphing, drawing, and complex path animations.
+  </Accordion>
+  
+  <Accordion title="Professional projects">
+    Trusted by major brands and used in award-winning websites. Backed by GreenSock's professional support.
+  </Accordion>
+  
+  <Accordion title="Fine-grained control">
+    When you need precise control over every aspect of your animations including playback, scrubbing, and dynamic updates.
+  </Accordion>
+</AccordionGroup>
+
+## Plugins and extras
+
+GSAP offers powerful plugins for advanced features:
+
+- **ScrollTrigger**: Scroll-based animations
+- **Draggable**: Advanced drag-and-drop functionality
+- **MorphSVG**: Morph between SVG shapes (Club GreenSock)
+- **SplitText**: Animate text character-by-character (Club GreenSock)
+- **DrawSVG**: Animate SVG strokes (Club GreenSock)
+
+<Note>
+  Some plugins require a Club GreenSock membership for commercial use.
+</Note>
+
+## Learn more
+
+<CardGroup cols={2}>
+  <Card title="Animation examples" icon="play" href="/examples/rotate">
+    Explore GSAP animation examples
+  </Card>
+  
+  <Card title="Official docs" icon="book" href="https://greensock.com/docs/">
+    Visit the GSAP documentation
+  </Card>
+</CardGroup>

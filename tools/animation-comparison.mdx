@@ -1,0 +1,516 @@
+---
+title: Animation comparison tool
+description: Compare CSS, JavaScript, and React animation techniques side-by-side
+---
+
+The Animation Comparison tool lets you compare different animation techniques in real-time. Run the same animation using CSS transitions, CSS keyframes, JavaScript, spring physics, and orchestrated sequences to understand the strengths and limitations of each approach.
+
+## Overview
+
+This interactive tool demonstrates five different animation techniques:
+
+- **CSS Transitions**: Simple property changes with smooth transitions
+- **CSS Keyframes**: Multi-step animations with intermediate states
+- **JavaScript Animation**: Frame-by-frame control using requestAnimationFrame
+- **Spring Physics**: Natural motion based on physics simulation
+- **Orchestrated**: Coordinated multi-element sequences
+
+## Side-by-side technique comparison
+
+Select one or more techniques to see them run simultaneously with the same animation settings. Each technique animates a colored box moving 150 pixels to the right.
+
+### CSS transitions
+
+**Best for**: Simple state changes, hover effects, and basic interactions
+
+CSS transitions provide the simplest way to animate between two states:
+
+```css
+.box {
+  transition: transform 1s ease 0s;
+}
+
+.box.animate {
+  transform: translateX(150px);
+}
+```
+
+The component applies transitions dynamically:
+
+```tsx
+<div 
+  className={`transition-transform ${
+    isAnimating ? 'translate-x-[150px]' : ''
+  }`}
+  style={{ 
+    transitionDuration: settings.duration,
+    transitionDelay: settings.delay,
+    transitionTimingFunction: settings.easing
+  }}
+>
+  CSS
+</div>
+```
+
+<Info>
+CSS transitions are hardware-accelerated by default and provide excellent performance with minimal code.
+</Info>
+
+**Advantages:**
+- Simple, declarative syntax
+- Excellent performance
+- Automatic hardware acceleration
+- Minimal JavaScript required
+
+**Limitations:**
+- Limited to start and end states
+- Cannot control animation midway through
+- No complex sequencing
+- Cannot read current animation values
+
+### CSS keyframes
+
+**Best for**: Multi-step animations, loading indicators, and repeating effects
+
+CSS keyframes allow you to define intermediate steps in your animation:
+
+```css
+@keyframes moveRight {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(150px); }
+}
+
+.box {
+  animation: moveRight 1s ease 0s forwards;
+}
+```
+
+The comparison tool applies keyframe animations dynamically:
+
+```tsx
+<div 
+  className={isAnimating ? 'animate-move-right' : ''}
+  style={{ 
+    animationDuration: settings.duration,
+    animationDelay: settings.delay,
+    animationTimingFunction: settings.easing,
+    animationFillMode: 'forwards'
+  }}
+>
+  KF
+</div>
+```
+
+**Advantages:**
+- Control over intermediate steps
+- Can animate multiple properties in sync
+- Declarative approach
+- Good performance
+
+**Limitations:**
+- More verbose than transitions
+- Less control than JavaScript
+- Can be harder to debug
+- Cannot respond to dynamic values easily
+
+### JavaScript animation
+
+**Best for**: Complex animations, precise control, and dynamic behavior
+
+JavaScript animations use `requestAnimationFrame` for precise frame-by-frame control:
+
+```tsx
+const element = document.querySelector('.box');
+const duration = 1000;
+const delay = 0;
+let startTime = null;
+
+setTimeout(() => {
+  requestAnimationFrame(function animate(time) {
+    if (startTime === null) startTime = time;
+    const elapsed = time - startTime;
+    
+    if (elapsed < duration) {
+      let progress = elapsed / duration;
+      
+      // Apply easing
+      if (settings.easing === 'ease-in') {
+        progress = progress * progress;
+      } else if (settings.easing === 'ease-out') {
+        progress = 1 - Math.pow(1 - progress, 2);
+      }
+      
+      element.style.transform = `translateX(${progress * 150}px)`;
+      requestAnimationFrame(animate);
+    }
+  });
+}, delay);
+```
+
+The comparison tool implements custom easing functions:
+
+```tsx
+// Ease-in-out approximation
+if (settings.easing === 'ease-in-out' || settings.easing === 'ease') {
+  progress = progress < 0.5
+    ? 2 * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+}
+```
+
+**Advantages:**
+- Complete control over every frame
+- Can respond to events mid-animation
+- Create custom easing functions
+- Read and react to current values
+
+**Limitations:**
+- More complex to implement
+- Can impact performance if not optimized
+- More code to write and maintain
+- Requires manual cleanup
+
+### Spring physics
+
+**Best for**: Natural-feeling motion, interactive elements, and realistic responses
+
+Spring-based animations simulate physical springs for natural motion:
+
+```tsx
+<motion.div
+  animate={{ x: 150 }}
+  transition={{ 
+    type: "spring",
+    stiffness: 100,
+    damping: 10,
+    delay: parseFloat(settings.delay) || 0
+  }}
+>
+  SP
+</motion.div>
+```
+
+<Warning>
+Spring animations don't use traditional duration values. The animation length is determined by physics parameters (stiffness and damping).
+</Warning>
+
+**Advantages:**
+- Natural, realistic motion
+- Based on physics principles
+- Responds naturally to interruptions
+- Feels more organic than easing curves
+
+**Limitations:**
+- Less predictable timing
+- More complex to fine-tune
+- May not fit all design requirements
+- Requires understanding of physics parameters
+
+**Spring parameters:**
+
+- **Stiffness**: How rigid the spring is (higher = faster)
+- **Damping**: How quickly motion settles (higher = less bounce)
+- **Mass**: How heavy the object feels (higher = slower)
+
+### Orchestrated animations
+
+**Best for**: Complex sequences, coordinated multi-element animations, storytelling
+
+Orchestrated animations coordinate multiple elements with precise timing:
+
+```tsx
+<div className="flex items-center gap-2">
+  <motion.div
+    animate={{ x: isAnimating ? 150 : 0 }}
+    transition={{ 
+      duration: parseFloat(settings.duration) || 1,
+      ease: getFramerEasing(settings.easing),
+      delay: parseFloat(settings.delay) || 0
+    }}
+  >
+    1
+  </motion.div>
+  <motion.div
+    animate={{ x: isAnimating ? 150 : 0 }}
+    transition={{ 
+      duration: parseFloat(settings.duration) || 1,
+      ease: getFramerEasing(settings.easing),
+      delay: (parseFloat(settings.delay) || 0) + 0.3  // Staggered
+    }}
+  >
+    2
+  </motion.div>
+</div>
+```
+
+The comparison tool uses Framer Motion, but libraries like GSAP offer even more control:
+
+```jsx
+// Using GSAP timeline
+const timeline = gsap.timeline({ delay: 0 });
+
+timeline.to(".box1", { 
+  x: 150, 
+  duration: 1,
+  ease: "ease"
+});
+
+timeline.to(".box2", { 
+  x: 150, 
+  duration: 1,
+  ease: "ease"
+}, "-=0.5"); // Starts 0.5s before previous ends
+```
+
+**Advantages:**
+- Control complex sequences
+- Coordinate multiple elements
+- Create sophisticated interactions
+- Precise timing control
+
+**Limitations:**
+- Most complex setup
+- Potentially higher performance cost
+- Steeper learning curve
+- May require animation library
+
+## CSS vs JS vs React libraries
+
+Choose the right technique based on your needs:
+
+### Use CSS transitions when:
+
+<CardGroup cols={2}>
+  <Card title="Simple interactions" icon="hand-pointer">
+    Hover effects, button states, and basic transitions
+  </Card>
+  <Card title="Performance is critical" icon="gauge-high">
+    CSS is hardware-accelerated by default
+  </Card>
+  <Card title="No JavaScript needed" icon="ban">
+    Pure CSS solutions work without JavaScript
+  </Card>
+  <Card title="Two-state animations" icon="toggle-on">
+    Simple start and end states
+  </Card>
+</CardGroup>
+
+### Use CSS keyframes when:
+
+<CardGroup cols={2}>
+  <Card title="Multi-step animations" icon="stairs">
+    Animations with intermediate states
+  </Card>
+  <Card title="Looping animations" icon="arrows-rotate">
+    Loading spinners, pulsing effects
+  </Card>
+  <Card title="Declarative approach" icon="file-code">
+    When you prefer CSS-based solutions
+  </Card>
+  <Card title="Static sequences" icon="film">
+    Animations that don't need dynamic values
+  </Card>
+</CardGroup>
+
+### Use JavaScript when:
+
+<CardGroup cols={2}>
+  <Card title="Complex logic" icon="code">
+    Animations that respond to calculations
+  </Card>
+  <Card title="Dynamic values" icon="arrows-spin">
+    When animation values change based on state
+  </Card>
+  <Card title="Precise control" icon="sliders">
+    Need to control every frame
+  </Card>
+  <Card title="Event responses" icon="bolt">
+    Animations that react to user input
+  </Card>
+</CardGroup>
+
+### Use React libraries when:
+
+<CardGroup cols={2}>
+  <Card title="Component integration" icon="react">
+    Tight integration with React components
+  </Card>
+  <Card title="Gesture handling" icon="hand">
+    Drag, swipe, and touch interactions
+  </Card>
+  <Card title="Natural motion" icon="leaf">
+    Spring physics and realistic movement
+  </Card>
+  <Card title="Complex orchestration" icon="layer-group">
+    Multi-element coordinated sequences
+  </Card>
+</CardGroup>
+
+## Easing function comparison
+
+The comparison tool supports different easing functions:
+
+### Linear
+
+Constant speed throughout the animation. Best for continuous rotations or mechanical movement.
+
+### Ease
+
+Starts slow, speeds up, then slows down. The default easing that feels natural for most animations.
+
+### Ease-in
+
+Starts slow and accelerates. Good for elements leaving the viewport.
+
+### Ease-out
+
+Starts fast and decelerates. Good for elements entering the viewport.
+
+### Ease-in-out
+
+Starts slow, speeds up, then slows down (more pronounced than "ease"). Good for animations that feel polished.
+
+The tool maps CSS easing values to Framer Motion:
+
+```tsx
+const getFramerEasing = (cssEasing: string) => {
+  switch (cssEasing) {
+    case 'ease-in':
+      return easeIn
+    case 'ease-out':
+      return easeOut
+    case 'ease-in-out':
+      return easeInOut
+    case 'linear':
+      return "linear"
+    case 'ease':
+    default:
+      return [0.42, 0, 0.58, 1]  // CSS "ease" cubic-bezier
+  }
+}
+```
+
+## Use cases for each approach
+
+### E-commerce product hover
+
+**Best choice**: CSS transitions
+
+```css
+.product-card {
+  transition: transform 0.3s ease-out;
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+}
+```
+
+Simple, performant, and works without JavaScript.
+
+### Loading spinner
+
+**Best choice**: CSS keyframes
+
+```css
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+```
+
+Continuous rotation with minimal code.
+
+### Drag-and-drop interface
+
+**Best choice**: JavaScript with React library
+
+```tsx
+<motion.div
+  drag
+  dragConstraints={{ left: 0, right: 300, top: 0, bottom: 300 }}
+  dragElastic={0.1}
+  whileDrag={{ scale: 1.05 }}
+/>
+```
+
+Complex interactions need library support.
+
+### Page transition sequence
+
+**Best choice**: Orchestrated animations
+
+```tsx
+const variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+<motion.div variants={variants}>
+  <motion.div variants={itemVariants}>Item 1</motion.div>
+  <motion.div variants={itemVariants}>Item 2</motion.div>
+  <motion.div variants={itemVariants}>Item 3</motion.div>
+</motion.div>
+```
+
+Coordinated entrance animations.
+
+## Experimentation tips
+
+<Steps>
+  <Step title="Select multiple techniques">
+    Choose 2-3 techniques to compare them running simultaneously.
+  </Step>
+  
+  <Step title="Adjust animation settings">
+    Change duration, delay, and easing to see how each technique responds.
+  </Step>
+  
+  <Step title="Click 'Learn more'">
+    View detailed information about each technique, including code examples and pros/cons.
+  </Step>
+  
+  <Step title="Observe the differences">
+    Notice how spring physics moves differently than CSS easing, or how orchestrated animations coordinate multiple elements.
+  </Step>
+</Steps>
+
+<Tip>
+Try setting a long duration (3s) and slow easing to clearly see the differences in how each technique handles motion.
+</Tip>
+
+## Performance considerations
+
+Different techniques have different performance characteristics:
+
+| Technique | Performance | Overhead | Best for |
+|-----------|-------------|----------|----------|
+| CSS Transitions | Excellent | Minimal | Simple effects |
+| CSS Keyframes | Excellent | Minimal | Looping animations |
+| JavaScript | Good | Moderate | Complex logic |
+| Spring Physics | Good | Moderate | Natural motion |
+| Orchestrated | Fair | Higher | Multi-element |
+
+<Warning>
+JavaScript animations require proper cleanup. The comparison tool uses `cancelAnimationFrame` to prevent memory leaks.
+</Warning>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Performance metrics" icon="gauge" href="/tools/performance-metrics">
+    Monitor FPS and optimize your animations
+  </Card>
+  <Card title="Animation playground" icon="wand-magic-sparkles" href="/tools/playground">
+    Create custom animations with the timeline editor
+  </Card>
+</CardGroup>

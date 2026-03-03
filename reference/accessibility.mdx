@@ -1,0 +1,185 @@
+---
+title: Accessibility
+description: Making animations accessible to all users with motion preferences and assistive technologies
+---
+
+Accessible animations respect user preferences and ensure your content works for everyone, including users with vestibular disorders, seizure disorders, or those using assistive technologies.
+
+## Respecting motion preferences
+
+Many users enable "Reduce Motion" in their operating system settings due to vestibular disorders or motion sensitivity.
+
+### CSS approach
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+### JavaScript detection
+
+```tsx
+const prefersReducedMotion = window.matchMedia(
+  '(prefers-reduced-motion: reduce)'
+).matches
+
+if (prefersReducedMotion) {
+  // Use instant transitions or simpler animations
+}
+```
+
+### React implementation
+
+The Animation Playground includes an accessibility control:
+
+```tsx
+function AccessibilityControls() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+
+  return (
+    <div className="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg">
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={prefersReducedMotion}
+          onChange={(e) => setPrefersReducedMotion(e.target.checked)}
+        />
+        <span className="text-sm">Simulate prefers-reduced-motion</span>
+      </label>
+      <InfoTooltip
+        title="Accessibility"
+        content="Users can enable reduced motion in their OS settings. Your animations should respect this preference."
+      />
+    </div>
+  )
+}
+```
+
+## Framer Motion support
+
+```tsx
+import { motion, useReducedMotion } from 'framer-motion'
+
+function Component() {
+  const shouldReduceMotion = useReducedMotion()
+
+  return (
+    <motion.div
+      animate={{ x: shouldReduceMotion ? 0 : 100 }}
+      transition={{ duration: shouldReduceMotion ? 0 : 0.5 }}
+    />
+  )
+}
+```
+
+## Safe animation practices
+
+<CardGroup cols={2}>
+  <Card title="Avoid flashing" icon="triangle-exclamation">
+    Never flash more than 3 times per second - can trigger seizures
+  </Card>
+  <Card title="Limit parallax" icon="layer-group">
+    Excessive parallax scrolling can cause nausea
+  </Card>
+  <Card title="Provide pause controls" icon="pause">
+    For auto-playing animations, include pause/play controls
+  </Card>
+  <Card title="Keep animations subtle" icon="eye-slash">
+    Large, fast movements are more disorienting
+  </Card>
+</CardGroup>
+
+## ARIA considerations
+
+### Animated content announcements
+
+```tsx
+<div role="status" aria-live="polite" aria-atomic="true">
+  {isAnimating ? 'Loading...' : 'Content loaded'}
+</div>
+```
+
+### Focus management
+
+```tsx
+<motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  onAnimationComplete={() => {
+    // Focus the first interactive element when animation completes
+    firstInputRef.current?.focus()
+  }}
+>
+  <input ref={firstInputRef} />
+</motion.div>
+```
+
+## Testing checklist
+
+<Steps>
+  <Step title="Enable reduced motion">
+    Test with OS-level reduced motion enabled:
+    - macOS: System Preferences → Accessibility → Display → Reduce motion
+    - Windows: Settings → Ease of Access → Display → Show animations
+    - iOS/Android: Settings → Accessibility → Reduce motion
+  </Step>
+  
+  <Step title="Use keyboard navigation">
+    Ensure all interactive elements are reachable and usable with keyboard only. Animations shouldn't interfere with Tab order.
+  </Step>
+  
+  <Step title="Test with screen readers">
+    Verify that screen readers correctly announce state changes triggered by animations.
+  </Step>
+  
+  <Step title="Check color contrast">
+    Animated elements should maintain WCAG AA contrast ratios (4.5:1 for text).
+  </Step>
+</Steps>
+
+## Implementation patterns
+
+### Conditional animations
+
+```tsx
+const variants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: prefersReducedMotion ? 0 : 0.5,
+      ease: 'easeOut'
+    }
+  }
+}
+```
+
+### Fallback to crossfade
+
+```tsx
+const transition = prefersReducedMotion
+  ? { duration: 0.2, ease: 'linear' }  // Quick crossfade
+  : { duration: 0.5, ease: 'easeInOut', type: 'spring' }  // Full animation
+```
+
+<Warning>
+  Don't completely remove animations for users with motion preferences. Use simpler, quicker transitions instead of instant changes.
+</Warning>
+
+## Resources
+
+- [WCAG 2.1 Animation Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/animation-from-interactions.html)
+- [Vestibular.org Motion Sensitivity](https://vestibular.org/article/triggers/visual-motion-sensitivity/)
+- [MDN prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
+
+## Related
+
+- [Performance optimization](/reference/optimization)
+- [Browser support](/reference/browser-support)
+- [React animations](/techniques/react-animations)

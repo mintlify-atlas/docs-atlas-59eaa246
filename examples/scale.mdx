@@ -1,0 +1,414 @@
+---
+title: Scale animation
+description: Create grow and shrink effects using scale transforms for emphasis and interactive feedback
+---
+
+## Live demo
+
+Scale animations change an element's size by growing or shrinking it from its center point. They're perfect for hover effects, button feedback, and drawing attention to important elements.
+
+<Note>
+  Scale animations work best when combined with smooth easing functions and subtle opacity changes.
+</Note>
+
+## Complete code example
+
+<Tabs>
+  <Tab title="Framer Motion">
+    ```tsx
+    import { motion } from 'framer-motion'
+
+    export default function ScaleDemo() {
+      return (
+        <div className="grid grid-cols-3 gap-4">
+          {/* Hover scale */}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="p-6 bg-blue-500 text-white rounded-lg cursor-pointer"
+          >
+            Hover me
+          </motion.div>
+
+          {/* Pulse scale */}
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }}
+            className="p-6 bg-purple-500 text-white rounded-lg"
+          >
+            Pulsing
+          </motion.div>
+
+          {/* Pop in */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{
+              type: 'spring',
+              stiffness: 260,
+              damping: 20
+            }}
+            className="p-6 bg-green-500 text-white rounded-lg"
+          >
+            Pop in
+          </motion.div>
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="React Spring">
+    ```tsx
+    import { useSpring, animated } from '@react-spring/web'
+    import { useState } from 'react'
+
+    export default function ScaleDemo() {
+      const [isScaled, setIsScaled] = useState(false)
+
+      const scaleProps = useSpring({
+        scale: isScaled ? 1.2 : 1,
+        config: { tension: 300, friction: 10 }
+      })
+
+      return (
+        <animated.div
+          style={{
+            ...scaleProps,
+            padding: '1.5rem',
+            background: '#3B82F6',
+            color: 'white',
+            borderRadius: '0.5rem',
+            cursor: 'pointer'
+          }}
+          onClick={() => setIsScaled(!isScaled)}
+        >
+          Click to scale
+        </animated.div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="CSS">
+    ```tsx
+    import './scale.css'
+
+    export default function ScaleDemo() {
+      return (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="pulse-scale p-6 bg-blue-500 text-white rounded-lg">
+            Pulse scale
+          </div>
+          
+          <div className="hover-scale p-6 bg-purple-500 text-white rounded-lg">
+            Hover scale
+          </div>
+        </div>
+      )
+    }
+    ```
+    
+    ```css scale.css
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+    }
+
+    .pulse-scale {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .hover-scale {
+      transition: transform 0.3s ease;
+    }
+
+    .hover-scale:hover {
+      transform: scale(1.1);
+    }
+
+    .hover-scale:active {
+      transform: scale(0.95);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## How it works
+
+Scale animations use the `scale` transform property:
+
+<Steps>
+  <Step title="Set scale value">
+    Scale value of 1 = normal size, less than 1 = smaller, greater than 1 = larger. For example, 1.5 = 150% of original size.
+  </Step>
+  
+  <Step title="Define transform origin">
+    By default, elements scale from their center. Change with `transform-origin`.
+  </Step>
+  
+  <Step title="Apply transition">
+    Add timing and easing to create smooth scaling motion.
+  </Step>
+</Steps>
+
+### Scale variations
+
+<CardGroup cols={2}>
+  <Card title="Uniform scale" icon="expand">
+    `scale: 1.5` - Scales both width and height equally
+  </Card>
+  
+  <Card title="Horizontal scale" icon="arrows-left-right">
+    `scaleX: 1.5` - Scales only width
+  </Card>
+  
+  <Card title="Vertical scale" icon="arrows-up-down">
+    `scaleY: 1.5` - Scales only height
+  </Card>
+  
+  <Card title="Independent axes" icon="grid">
+    `scale: [1.5, 0.8]` - Different X and Y scaling
+  </Card>
+</CardGroup>
+
+## Variations
+
+### Button press effect
+
+Scale down on press for tactile feedback:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function Button() {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className="px-6 py-3 bg-blue-500 text-white rounded-lg"
+    >
+      Click Me
+    </motion.button>
+  )
+}
+```
+
+### Entrance animation
+
+Pop in effect for appearing elements:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function PopIn() {
+  return (
+    <motion.div
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{
+        type: 'spring',
+        stiffness: 260,
+        damping: 20
+      }}
+    >
+      Content
+    </motion.div>
+  )
+}
+```
+
+### Breathing animation
+
+Subtle scale pulse for attention:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function Breathing() {
+  return (
+    <motion.div
+      animate={{
+        scale: [1, 1.05, 1]
+      }}
+      transition={{
+        duration: 2,
+        repeat: Infinity,
+        ease: 'easeInOut'
+      }}
+      className="w-16 h-16 bg-red-500 rounded-full"
+    >
+      Live
+    </motion.div>
+  )
+}
+```
+
+### Scale with origin
+
+Scale from specific point:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function ScaleFromCorner() {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.2 }}
+      style={{ transformOrigin: 'top left' }}
+      className="w-32 h-32 bg-purple-500"
+    >
+      Scales from top-left
+    </motion.div>
+  )
+}
+```
+
+## Example from the playground
+
+From the AdvancedAnimations component:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+function ScaleAnimation() {
+  const [isActive, setIsActive] = useState(false)
+
+  return (
+    <div>
+      <motion.div
+        animate={isActive ? {
+          scale: [1, 1.5, 0.5, 1]
+        } : {}}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          repeatType: 'loop'
+        }}
+        className="w-20 h-20 bg-blue-500 rounded-lg"
+      />
+      
+      <button
+        onClick={() => setIsActive(!isActive)}
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+      >
+        {isActive ? 'Stop' : 'Start'} Animation
+      </button>
+    </div>
+  )
+}
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Keep scale subtle">
+    Large scale changes can be jarring. Stick to 0.9-1.2 range for most UI interactions.
+    
+    ```tsx
+    // Good - subtle
+    whileHover={{ scale: 1.05 }}
+    
+    // Too much for UI
+    whileHover={{ scale: 2 }}
+    ```
+  </Accordion>
+  
+  <Accordion title="Combine with opacity">
+    Adding opacity changes makes scale animations smoother.
+    
+    ```tsx
+    <motion.div
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+    />
+    ```
+  </Accordion>
+  
+  <Accordion title="Use spring physics">
+    Spring transitions create more natural scaling motion.
+    
+    ```tsx
+    transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+    ```
+  </Accordion>
+  
+  <Accordion title="Consider transform origin">
+    Default center scaling works for most cases, but custom origins can create interesting effects.
+  </Accordion>
+</AccordionGroup>
+
+## Common use cases
+
+- Button hover and press states
+- Card hover effects
+- Image zoom on hover
+- Loading pulse animations
+- Notification badges
+- Success/error indicators
+- Modal entrances
+- Emoji reactions
+
+## Performance tips
+
+<Warning>
+  Scale using transform is GPU-accelerated and performs excellently. Avoid animating width/height properties as they cause layout recalculations.
+</Warning>
+
+```tsx
+// Good - GPU accelerated
+<motion.div animate={{ scale: 1.5 }} />
+
+// Bad - causes layout recalc
+<motion.div animate={{ width: 200, height: 200 }} />
+```
+
+## Advanced: Independent axis scaling
+
+Scale X and Y independently for squeeze/stretch effects:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function Squash() {
+  return (
+    <motion.div
+      animate={{
+        scaleX: [1, 1.2, 0.8, 1],
+        scaleY: [1, 0.8, 1.2, 1]
+      }}
+      transition={{
+        duration: 1,
+        repeat: Infinity,
+        ease: 'easeInOut'
+      }}
+      className="w-32 h-32 bg-gradient-to-r from-pink-500 to-purple-500"
+    />
+  )
+}
+```
+
+## Related examples
+
+<CardGroup cols={3}>
+  <Card title="Fade in" icon="eye" href="/examples/fade-in">
+    Opacity transitions
+  </Card>
+  
+  <Card title="Pulse" icon="heart" href="/examples/pulse">
+    Rhythmic scale animations
+  </Card>
+  
+  <Card title="Bounce" icon="basketball" href="/examples/bounce">
+    Bouncing scale effects
+  </Card>
+</CardGroup>

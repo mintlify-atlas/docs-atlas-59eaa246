@@ -1,0 +1,351 @@
+---
+title: Keyframes and animation sequences
+description: Create complex multi-step animations using CSS keyframes and timeline concepts
+---
+
+Keyframes allow you to define multiple intermediate steps in an animation sequence, giving you precise control over how properties change over time.
+
+## Understanding keyframes
+
+A keyframe animation defines specific points along an animation timeline where property values are set. The browser automatically interpolates the values between keyframes.
+
+## CSS @keyframes syntax
+
+Define an animation sequence using the `@keyframes` rule:
+
+```css
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.element {
+  animation: fade-in 1s ease;
+}
+```
+
+### Multi-step animations
+
+Add intermediate keyframes for complex sequences:
+
+```css
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+```
+
+### Using from and to
+
+For simple two-state animations, you can use `from` and `to`:
+
+```css
+@keyframes slide-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+```
+
+## Real-world keyframe examples
+
+Here are keyframe animations from the Animation Playground:
+
+<Tabs>
+  <Tab title="Fade in">
+    ```css
+    @keyframes fade-in {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    ```
+    Simple opacity transition from invisible to visible.
+  </Tab>
+  <Tab title="Slide in">
+    ```css
+    @keyframes slide-in {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(0); }
+    }
+    ```
+    Element slides in from the left.
+  </Tab>
+  <Tab title="Rotate">
+    ```css
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    ```
+    Continuous rotation animation.
+  </Tab>
+  <Tab title="Bounce">
+    ```css
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-30px); }
+    }
+    ```
+    Bouncing motion with shared start and end states.
+  </Tab>
+</Tabs>
+
+## Animation properties
+
+Control how keyframe animations play using animation properties:
+
+```css
+.element {
+  animation-name: pulse;
+  animation-duration: 2s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+```
+
+Or use the shorthand:
+
+```css
+.element {
+  animation: pulse 2s ease-in-out infinite alternate;
+}
+```
+
+### Animation properties reference
+
+- **animation-name**: The name of the @keyframes animation
+- **animation-duration**: How long one cycle takes (e.g., `1s`, `500ms`)
+- **animation-timing-function**: Easing curve (see [timing functions](/concepts/timing-functions))
+- **animation-iteration-count**: Number of repetitions (`1`, `3`, `infinite`)
+- **animation-direction**: Playback direction (`normal`, `reverse`, `alternate`, `alternate-reverse`)
+- **animation-delay**: Wait before starting (e.g., `0.5s`)
+- **animation-fill-mode**: Styles before/after animation (`none`, `forwards`, `backwards`, `both`)
+- **animation-play-state**: Control playback (`running`, `paused`)
+
+## Timeline concepts
+
+<Note>
+  Think of keyframes as markers on a timeline. Each percentage represents a point in the animation's duration.
+</Note>
+
+### Timeline visualization
+
+```
+0%         25%         50%         75%         100%
+|-----------|-----------|-----------|-----------|
+Start    Keyframe    Keyframe   Keyframe     End
+```
+
+With a 2-second animation:
+- 0% = 0s
+- 25% = 0.5s  
+- 50% = 1s
+- 75% = 1.5s
+- 100% = 2s
+
+## React implementation example
+
+The Animation Playground provides an interactive timeline editor:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+type KeyframeStep = {
+  id: string
+  time: number
+  properties: {
+    x: number
+    y: number
+    scale: number
+    rotate: number
+    opacity: number
+  }
+}
+
+export default function AnimationPlayground() {
+  const [keyframes, setKeyframes] = useState<KeyframeStep[]>([
+    {
+      id: '1',
+      time: 0,
+      properties: { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1 }
+    }
+  ])
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  const getAnimationValues = (property: keyof KeyframeStep['properties']) => {
+    return keyframes.map(frame => frame.properties[property])
+  }
+
+  return (
+    <motion.div
+      animate={isPlaying ? {
+        x: getAnimationValues('x'),
+        y: getAnimationValues('y'),
+        scale: getAnimationValues('scale'),
+        rotate: getAnimationValues('rotate'),
+        opacity: getAnimationValues('opacity')
+      } : {}}
+      transition={{
+        duration: keyframes.length,
+        times: keyframes.map(k => k.time / keyframes.length),
+        repeat: Infinity
+      }}
+      className="w-20 h-20 bg-blue-500"
+    />
+  )
+}
+```
+
+## Advanced techniques
+
+### Staggered keyframes
+
+Different properties can peak at different times:
+
+```css
+@keyframes complex-animation {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.2) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0.5;
+  }
+  75% {
+    transform: scale(1) rotate(180deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 1;
+  }
+}
+```
+
+### Multiple animations
+
+Combine several animations on one element:
+
+```css
+.element {
+  animation: 
+    fade-in 1s ease-out,
+    slide-in 1s ease-out,
+    rotate 2s linear infinite;
+}
+```
+
+### Animation fill modes
+
+<Tabs>
+  <Tab title="forwards">
+    ```css
+    animation-fill-mode: forwards;
+    ```
+    Retains the final keyframe styles after animation completes.
+  </Tab>
+  <Tab title="backwards">
+    ```css
+    animation-fill-mode: backwards;
+    ```
+    Applies first keyframe styles during animation-delay.
+  </Tab>
+  <Tab title="both">
+    ```css
+    animation-fill-mode: both;
+    ```
+    Combines forwards and backwards behavior.
+  </Tab>
+</Tabs>
+
+## Framer Motion keyframes
+
+Framer Motion supports array-based keyframes:
+
+```tsx
+<motion.div
+  animate={{
+    scale: [1, 1.5, 0.5, 1],
+    rotate: [0, 180, -180, 0],
+    opacity: [1, 0.2, 1]
+  }}
+  transition={{
+    duration: 2,
+    times: [0, 0.25, 0.75, 1],
+    repeat: Infinity,
+    repeatType: "loop"
+  }}
+/>
+```
+
+The `times` array controls when each keyframe occurs (0 to 1).
+
+## Best practices
+
+<Warning>
+  Avoid animating properties that trigger layout or paint. Stick to `transform` and `opacity` for best performance.
+</Warning>
+
+### Keep keyframes simple
+
+Fewer keyframes mean smoother interpolation:
+
+**Good:**
+```css
+@keyframes simple-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+```
+
+**Avoid:**
+```css
+@keyframes complex-bounce {
+  0% { transform: translateY(0); }
+  10% { transform: translateY(-2px); }
+  20% { transform: translateY(-5px); }
+  30% { transform: translateY(-9px); }
+  /* ...many more keyframes */
+}
+```
+
+### Use meaningful percentages
+
+Align keyframes to natural breakpoints:
+- 0%, 25%, 50%, 75%, 100% for quarters
+- 0%, 33%, 66%, 100% for thirds  
+- 0%, 20%, 40%, 60%, 80%, 100% for fifths
+
+### Name animations clearly
+
+```css
+/* Good */
+@keyframes card-entrance { }
+@keyframes button-press { }
+@keyframes error-shake { }
+
+/* Avoid */
+@keyframes anim1 { }
+@keyframes cool-thing { }
+@keyframes my-animation { }
+```
+
+## Performance optimization
+
+Keyframe animations can be very performant when done correctly:
+
+1. **Animate only transform and opacity** - These properties are GPU-accelerated
+2. **Use will-change sparingly** - Only when animating frequently
+3. **Limit keyframe count** - More keyframes = more calculations
+4. **Avoid animating many elements** - Use CSS instead of JavaScript when possible
+
+<Note>
+  CSS keyframe animations run on a separate thread from JavaScript, making them more performant than JS-based animations in many cases.
+</Note>

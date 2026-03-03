@@ -1,0 +1,431 @@
+---
+title: Pulse animation
+description: Create rhythmic, attention-grabbing animations that grow and fade repeatedly
+---
+
+## Live demo
+
+Pulse animations create a rhythmic breathing effect by combining scale and opacity changes. They're perfect for drawing attention to notifications, live indicators, and interactive elements without being overly distracting.
+
+<Note>
+  Pulse animations should be subtle and slow to avoid causing fatigue or motion sickness.
+</Note>
+
+## Complete code example
+
+<Tabs>
+  <Tab title="Framer Motion">
+    ```tsx
+    import { motion } from 'framer-motion'
+
+    export default function PulseDemo() {
+      return (
+        <div className="space-y-8">
+          {/* Basic pulse */}
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [1, 0.8, 1]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }}
+            className="w-24 h-24 bg-red-500 rounded-full mx-auto"
+          />
+
+          {/* Ring pulse */}
+          <div className="relative w-24 h-24 mx-auto">
+            <div className="absolute inset-0 bg-blue-500 rounded-full" />
+            <motion.div
+              animate={{
+                scale: [1, 2],
+                opacity: [0.6, 0]
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: 'easeOut'
+              }}
+              className="absolute inset-0 bg-blue-500 rounded-full"
+            />
+          </div>
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="React Spring">
+    ```tsx
+    import { useSpring, animated } from '@react-spring/web'
+    import { useEffect, useState } from 'react'
+
+    export default function PulseDemo() {
+      const [flip, setFlip] = useState(false)
+
+      const pulseProps = useSpring({
+        scale: flip ? 1.2 : 1,
+        opacity: flip ? 0.8 : 1,
+        config: { tension: 120, friction: 14 }
+      })
+
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setFlip(v => !v)
+        }, 1000)
+        return () => clearInterval(interval)
+      }, [])
+
+      return (
+        <animated.div
+          style={{
+            ...pulseProps,
+            width: '6rem',
+            height: '6rem',
+            background: '#EF4444',
+            borderRadius: '9999px',
+            margin: '0 auto'
+          }}
+        />
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="CSS">
+    ```tsx
+    import './pulse.css'
+
+    export default function PulseDemo() {
+      return (
+        <div className="space-y-8">
+          <div className="pulse w-24 h-24 bg-red-500 rounded-full mx-auto" />
+          <div className="pulse-ring relative w-24 h-24 mx-auto">
+            <div className="absolute inset-0 bg-blue-500 rounded-full" />
+            <div className="ping absolute inset-0 bg-blue-500 rounded-full" />
+          </div>
+        </div>
+      )
+    }
+    ```
+    
+    ```css pulse.css
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes ping {
+      0% {
+        transform: scale(1);
+        opacity: 0.6;
+      }
+      100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .ping {
+      animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## How it works
+
+Pulse animations combine multiple properties:
+
+<Steps>
+  <Step title="Scale oscillation">
+    The element grows and shrinks rhythmically between its normal size and a slightly larger size.
+  </Step>
+  
+  <Step title="Opacity fade">
+    Opacity changes subtly to enhance the breathing effect.
+  </Step>
+  
+  <Step title="Smooth easing">
+    Use `ease-in-out` for smooth transitions that feel organic.
+  </Step>
+</Steps>
+
+### Pulse variations
+
+<CardGroup cols={2}>
+  <Card title="Basic pulse" icon="heart">
+    Simple scale and opacity oscillation
+  </Card>
+  
+  <Card title="Ring pulse" icon="circle-dot">
+    Expanding ring that fades out (ping effect)
+  </Card>
+  
+  <Card title="Glow pulse" icon="lightbulb">
+    Shadow or blur expanding and contracting
+  </Card>
+  
+  <Card title="Color pulse" icon="palette">
+    Background or border color shifting
+  </Card>
+</CardGroup>
+
+## Variations
+
+### Live indicator
+
+Perfect for showing live status:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function LiveIndicator() {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="relative">
+        <motion.div
+          animate={{
+            scale: [1, 1.5],
+            opacity: [0.7, 0]
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: 'easeOut'
+          }}
+          className="absolute w-3 h-3 bg-red-500 rounded-full"
+        />
+        <div className="relative w-3 h-3 bg-red-500 rounded-full" />
+      </div>
+      <span className="text-sm font-medium">LIVE</span>
+    </div>
+  )
+}
+```
+
+### Notification badge
+
+Attention-grabbing badge pulse:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function NotificationBadge({ count }) {
+  return (
+    <motion.div
+      animate={{
+        scale: [1, 1.2, 1]
+      }}
+      transition={{
+        duration: 1,
+        repeat: Infinity,
+        repeatType: 'reverse'
+      }}
+      className="w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center"
+    >
+      {count}
+    </motion.div>
+  )
+}
+```
+
+### Breathing card
+
+Subtle pulse for emphasis:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function BreathingCard() {
+  return (
+    <motion.div
+      animate={{
+        scale: [1, 1.02, 1],
+        boxShadow: [
+          '0 4px 6px rgba(0,0,0,0.1)',
+          '0 8px 12px rgba(0,0,0,0.15)',
+          '0 4px 6px rgba(0,0,0,0.1)'
+        ]
+      }}
+      transition={{
+        duration: 3,
+        repeat: Infinity,
+        ease: 'easeInOut'
+      }}
+      className="p-6 bg-white rounded-lg"
+    >
+      Featured Content
+    </motion.div>
+  )
+}
+```
+
+### Multi-ring pulse
+
+Multiple expanding rings:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function MultiRingPulse() {
+  return (
+    <div className="relative w-16 h-16">
+      <div className="absolute inset-0 bg-purple-500 rounded-full" />
+      {[0, 0.3, 0.6].map((delay, i) => (
+        <motion.div
+          key={i}
+          animate={{
+            scale: [1, 2.5],
+            opacity: [0.5, 0]
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            delay,
+            ease: 'easeOut'
+          }}
+          className="absolute inset-0 bg-purple-500 rounded-full"
+        />
+      ))}
+    </div>
+  )
+}
+```
+
+## Example from the playground
+
+From the CSSAnimations component:
+
+```tsx
+const presets = {
+  pulse: `
+.animated-element {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}`,
+}
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Keep it subtle">
+    Pulse animations should be noticeable but not distracting. Use small scale changes (1-1.2).
+    
+    ```tsx
+    // Good - subtle pulse
+    scale: [1, 1.1, 1]
+    
+    // Too aggressive
+    scale: [1, 2, 1]
+    ```
+  </Accordion>
+  
+  <Accordion title="Use slow duration">
+    Slower pulses (2-3 seconds) feel more natural and less jarring.
+    
+    ```tsx
+    transition={{ duration: 2.5, repeat: Infinity }}
+    ```
+  </Accordion>
+  
+  <Accordion title="Combine properties">
+    Mixing scale with opacity or shadow creates richer effects.
+    
+    ```tsx
+    animate={{
+      scale: [1, 1.1, 1],
+      opacity: [1, 0.8, 1],
+      boxShadow: ['0 0 0 rgba(0,0,0,0)', '0 0 20px rgba(0,0,0,0.2)', '0 0 0 rgba(0,0,0,0)']
+    }}
+    ```
+  </Accordion>
+  
+  <Accordion title="Respect reduced motion">
+    Disable pulse animations for users who prefer reduced motion.
+    
+    ```tsx
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches
+    
+    const animate = prefersReducedMotion ? {} : { scale: [1, 1.1, 1] }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Common use cases
+
+- Live status indicators
+- Notification badges
+- Recording indicators
+- Loading states
+- Call-to-action emphasis
+- Online/active status
+- Alert signals
+- Microphone/camera active indicators
+
+## Performance tips
+
+<Warning>
+  Pulse animations using scale and opacity are GPU-accelerated. Avoid pulsing other properties like width, height, or border-width.
+</Warning>
+
+```tsx
+// Good - GPU accelerated
+<motion.div animate={{ scale: 1.1, opacity: 0.8 }} />
+
+// Avoid - forces repaints
+<motion.div animate={{ width: 120, borderWidth: 5 }} />
+```
+
+## Accessibility considerations
+
+Pulse animations can be distracting for some users:
+
+- Keep animations slow (2+ seconds)
+- Limit number of pulsing elements on screen
+- Provide option to disable animations
+- Respect `prefers-reduced-motion` system setting
+- Don't pulse rapidly (< 1 second) as it can trigger seizures
+
+## Related examples
+
+<CardGroup cols={3}>
+  <Card title="Scale" icon="expand" href="/examples/scale">
+    Scale transform animations
+  </Card>
+  
+  <Card title="Bounce" icon="basketball" href="/examples/bounce">
+    Bouncing motion effects
+  </Card>
+  
+  <Card title="Fade in" icon="eye" href="/examples/fade-in">
+    Opacity transitions
+  </Card>
+</CardGroup>

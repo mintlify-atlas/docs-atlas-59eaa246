@@ -1,0 +1,260 @@
+---
+title: Timing functions
+description: Master animation timing functions to control the acceleration and pacing of your web animations
+---
+
+Timing functions control how an animation progresses over time. They define the acceleration curve, determining whether an animation starts fast and slows down, or starts slow and speeds up.
+
+## Understanding timing functions
+
+A timing function (also called an easing function) maps the progress of an animation from start to finish. The same animation with different timing functions will feel completely different.
+
+## Available timing functions
+
+### Linear
+
+The animation proceeds at a constant rate from start to finish.
+
+```css
+.element {
+  transition: transform 1s linear;
+}
+```
+
+**Visual effect:** Mechanical and uniform. The element moves at exactly the same speed throughout the entire animation.
+
+**When to use:** 
+- Loading spinners and progress bars
+- Continuous rotations
+- Mechanical or robotic movements
+
+### Ease (default)
+
+Starts slowly, speeds up in the middle, then slows down at the end.
+
+```css
+.element {
+  transition: transform 1s ease;
+}
+```
+
+**Visual effect:** Natural and smooth. This is the default timing function and works well for most animations.
+
+**When to use:**
+- General-purpose animations
+- UI transitions
+- When unsure which timing to use
+
+### Ease-in
+
+Starts slowly and gradually accelerates toward the end.
+
+```css
+.element {
+  transition: transform 1s ease-in;
+}
+```
+
+**Visual effect:** The animation begins tentatively and builds momentum, like an object starting to roll downhill.
+
+**When to use:**
+- Elements exiting the screen
+- Objects falling or accelerating
+- Creating anticipation before a fast action
+
+### Ease-out
+
+Starts quickly and decelerates toward the end.
+
+```css
+.element {
+  transition: transform 1s ease-out;
+}
+```
+
+**Visual effect:** The animation starts with energy and gently settles into place, like an object coming to rest.
+
+**When to use:**
+- Elements entering the screen
+- Buttons responding to clicks
+- Modals and dialogs appearing
+- Most interactive UI feedback
+
+### Ease-in-out
+
+Starts slowly, speeds up in the middle, then slows down again.
+
+```css
+.element {
+  transition: transform 1s ease-in-out;
+}
+```
+
+**Visual effect:** Symmetrical acceleration and deceleration, creating a polished, elegant feel.
+
+**When to use:**
+- Smooth transitions between states
+- Page transitions
+- Carousel animations
+- Hover effects that reverse
+
+## React implementation example
+
+Here's how the Animation Playground demonstrates timing functions:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+type TimingFunction = 'linear' | 'easeIn' | 'easeOut' | 'easeInOut'
+
+export default function TimingDemo() {
+  const [selectedTiming, setSelectedTiming] = useState<TimingFunction>('linear')
+  const [isAnimating, setIsAnimating] = useState(false)
+
+  const handleAnimate = () => {
+    setIsAnimating(true)
+    setTimeout(() => setIsAnimating(false), 1500)
+  }
+
+  return (
+    <div>
+      <motion.div
+        animate={{ x: isAnimating ? 'calc(100% - 128px)' : 0 }}
+        transition={{
+          duration: 1.5,
+          ease: selectedTiming.toLowerCase()
+        }}
+        className="w-32 h-32 bg-blue-500"
+      >
+        Timing Box
+      </motion.div>
+      
+      <button onClick={handleAnimate}>
+        {isAnimating ? 'Animating...' : 'Start Animation'}
+      </button>
+    </div>
+  )
+}
+```
+
+## Custom cubic bezier curves
+
+For precise control, you can define custom timing functions using cubic-bezier:
+
+```css
+.element {
+  transition: transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+```
+
+This creates a custom curve with four control points. Tools like [cubic-bezier.com](https://cubic-bezier.com) help visualize these curves.
+
+### Common custom curves
+
+<Tabs>
+  <Tab title="Bounce">
+    ```css
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    ```
+    Creates a bouncy, overshooting effect.
+  </Tab>
+  <Tab title="Snap">
+    ```css
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    ```
+    Quick, snappy animations (Material Design standard).
+  </Tab>
+  <Tab title="Smooth">
+    ```css
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    ```
+    Very smooth, flowing motion.
+  </Tab>
+</Tabs>
+
+## Choosing the right timing function
+
+<Note>
+  The timing function you choose dramatically affects how your animation feels. Experiment with different options to find what works best.
+</Note>
+
+### Decision guide
+
+**For entering elements:** Use `ease-out`
+- Makes elements feel responsive and energetic
+- Creates the impression of elements "arriving" at their destination
+
+**For exiting elements:** Use `ease-in`
+- Elements smoothly accelerate as they leave
+- Feels natural for dismissing UI
+
+**For state changes:** Use `ease` or `ease-in-out`
+- Balanced acceleration works well for toggles
+- Symmetrical motion feels polished
+
+**For continuous animations:** Use `linear`
+- Progress bars need constant speed
+- Rotations look better without acceleration
+
+## Timing with Framer Motion
+
+Framer Motion provides additional easing options:
+
+```tsx
+<motion.div
+  animate={{ x: 100 }}
+  transition={{
+    type: "spring",
+    stiffness: 100,
+    damping: 10
+  }}
+/>
+```
+
+<Tabs>
+  <Tab title="Tween (default)">
+    ```tsx
+    transition={{ 
+      type: "tween",
+      ease: "easeOut",
+      duration: 0.3 
+    }}
+    ```
+    Traditional CSS-style easing.
+  </Tab>
+  <Tab title="Spring">
+    ```tsx
+    transition={{ 
+      type: "spring",
+      stiffness: 100,
+      damping: 10
+    }}
+    ```
+    Physics-based spring animations.
+  </Tab>
+  <Tab title="Inertia">
+    ```tsx
+    transition={{ 
+      type: "inertia",
+      velocity: 50
+    }}
+    ```
+    Realistic deceleration based on velocity.
+  </Tab>
+</Tabs>
+
+## Performance considerations
+
+<Warning>
+  Timing functions themselves don't impact performance, but longer durations mean longer repaints. Keep animations under 500ms for UI interactions.
+</Warning>
+
+### Duration guidelines
+
+- **Micro-interactions:** 100-200ms
+- **UI transitions:** 200-400ms  
+- **Page transitions:** 400-600ms
+- **Decorative animations:** 600-1000ms
+
+Pair faster timing functions (like `ease-out`) with shorter durations for responsive UIs.

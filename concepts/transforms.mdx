@@ -1,0 +1,194 @@
+---
+title: Transform properties
+description: Learn how to use CSS transform properties to move, rotate, scale, and skew elements in web animations
+---
+
+Transform properties are fundamental to creating smooth, performant animations. They allow you to manipulate elements without triggering layout recalculations, making them ideal for interactive animations.
+
+## Core transform properties
+
+CSS provides four main transform functions that can be combined to create complex effects:
+
+### Translate
+
+Translation moves elements horizontally (X-axis) and vertically (Y-axis). This is like sliding an object across a surface without changing its appearance.
+
+```css
+.element {
+  transform: translate(50px, 20px);
+}
+```
+
+The element shifts 50px to the right and 20px down from its original position.
+
+### Scale
+
+Scaling changes the size of an element. A value greater than 1 makes it larger, while a value less than 1 makes it smaller.
+
+```css
+.element {
+  transform: scale(1.2);
+}
+```
+
+The element is now 1.2 times its original size. Scaling is uniform in both width and height unless you specify separate values:
+
+```css
+.element {
+  transform: scale(1.5, 0.8); /* 150% width, 80% height */
+}
+```
+
+### Rotate
+
+Rotation turns an element around its center point by a specified angle in degrees.
+
+```css
+.element {
+  transform: rotate(45deg);
+}
+```
+
+The element rotates 45 degrees clockwise. Negative values rotate counter-clockwise.
+
+### Skew
+
+Skew tilts an element, creating a parallelogram shape. It can be applied to X-axis, Y-axis, or both.
+
+```css
+.element {
+  transform: skew(15deg, 10deg);
+}
+```
+
+The element is skewed 15 degrees horizontally and 10 degrees vertically.
+
+## Combining transforms
+
+<Note>
+  Multiple transforms can be combined to create complex effects. The order of application matters when transforms are combined.
+</Note>
+
+In CSS, multiple transforms are combined in a single transform property:
+
+```css
+.element {
+  transform: translate(50px, 20px) rotate(45deg) scale(1.2) skew(15deg, 10deg);
+}
+```
+
+The order is important because each transform is applied to the result of the previous one.
+
+## React implementation example
+
+Here's how the Animation Playground implements interactive transforms using Framer Motion:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+type TransformProperty = 'translate' | 'scale' | 'rotate' | 'skew'
+
+export default function TransformDemo() {
+  const [activeTransforms, setActiveTransforms] = useState<TransformProperty[]>([])
+
+  const getTransformStyle = () => {
+    const transforms = {
+      translate: { x: 50, y: 20 },
+      scale: { scale: 1.2 },
+      rotate: { rotate: 45 },
+      skew: { skewX: 15, skewY: 10 }
+    }
+
+    return Object.entries(transforms)
+      .filter(([key]) => activeTransforms.includes(key as TransformProperty))
+      .reduce((acc, [_, value]) => ({ ...acc, ...value }), {})
+  }
+
+  return (
+    <motion.div
+      animate={getTransformStyle()}
+      transition={{ duration: 0.5 }}
+      className="w-32 h-32 bg-blue-500 rounded-lg"
+    >
+      Transform Me
+    </motion.div>
+  )
+}
+```
+
+## Best practices
+
+<Warning>
+  Avoid animating properties like `top`, `left`, `width`, or `height`. These trigger layout recalculations and can cause performance issues.
+</Warning>
+
+### Use transform for position changes
+
+**Instead of:**
+```css
+.element {
+  left: 100px;
+  top: 50px;
+}
+```
+
+**Use:**
+```css
+.element {
+  transform: translate(100px, 50px);
+}
+```
+
+### Set transform origin when needed
+
+By default, transforms originate from the center of an element. You can change this:
+
+```css
+.element {
+  transform-origin: top left;
+  transform: rotate(45deg);
+}
+```
+
+### Combine with hardware acceleration
+
+For optimal performance, use `transform` with `will-change` or `transform3d`:
+
+```css
+.element {
+  will-change: transform;
+  transform: translate(50px, 20px);
+}
+```
+
+### Order matters
+
+Different orders produce different results:
+
+<Tabs>
+  <Tab title="Translate then rotate">
+    ```css
+    transform: translate(100px, 0) rotate(45deg);
+    ```
+    Moves right, then rotates in place.
+  </Tab>
+  <Tab title="Rotate then translate">
+    ```css
+    transform: rotate(45deg) translate(100px, 0);
+    ```
+    Rotates first, then moves along the rotated axis.
+  </Tab>
+</Tabs>
+
+## Performance benefits
+
+Transforms are hardware-accelerated by modern browsers because they:
+- Don't trigger layout recalculations
+- Don't affect surrounding elements
+- Can be handled by the GPU
+- Maintain smooth 60 FPS animations
+
+<Note>
+  Transform properties (`transform` and `opacity`) are the most performant CSS properties to animate.
+</Note>

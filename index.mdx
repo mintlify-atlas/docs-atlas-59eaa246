@@ -1,97 +1,104 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: Introduction
+description: Welcome to the Animation Playground - an interactive learning platform for mastering web animations through hands-on examples.
 ---
 
-## Setting up
+# Welcome to the Animation Playground
 
-Get your documentation site up and running in minutes.
+Animation Playground is an interactive learning platform that helps you understand web animations through hands-on examples. Whether you're new to animations or looking to master advanced techniques, this platform provides the tools and examples you need to create smooth, performant animations.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get up and running in 5 minutes with your first animation
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Installation" icon="download" href="/installation">
+    Learn how to install and set up the Animation Playground locally
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Core concepts" icon="book">
+    Understand transforms, timing functions, and animation principles
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Examples" icon="code">
+    Explore real-world animation examples using CSS, JavaScript, and React
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Key features
 
-Everything you need to create world-class documentation.
+Animation Playground provides a comprehensive set of features to help you learn and master web animations:
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+### Interactive playground
 
-## Need inspiration?
+Experiment with animations in real-time using our interactive playground. Create keyframes, adjust properties with sliders, and preview animations instantly:
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+- **Timeline editor** - Create and reorder keyframes with drag-and-drop
+- **Property controls** - Adjust x, y, scale, rotate, and opacity values
+- **Live preview** - See your animations update in real-time
+- **Play/pause controls** - Preview your animation sequence
+
+### Multiple animation techniques
+
+Learn different approaches to creating web animations:
+
+**CSS animations**
+- Pre-defined animations (fade-in, slide-in, rotate, pulse, bounce)
+- Interactive timeline visualization showing keyframe progression
+- Live code generation showing CSS keyframes
+- Control duration, timing function, iteration count, and direction
+
+**JavaScript animations**
+- `requestAnimationFrame` for smooth frame-by-frame control
+- GSAP (GreenSock) for professional-grade animations
+- Canvas-based particle effects with 50+ animated particles
+
+**React animation libraries**
+- Framer Motion for declarative animations with gesture support
+- React Spring for physics-based natural motion
+- Reorder components for draggable, sortable lists
+- AnimatePresence for exit animations
+
+### Performance monitoring
+
+Understand and optimize animation performance with built-in metrics:
+
+- **Real-time FPS tracking** - Monitor frames per second as animations run
+- **Performance comparison** - Test up to 100 animated elements
+- **Transform vs. position** - Compare performance of different animation techniques
+- **Visual FPS graph** - See performance trends over time
+
+### Learning tools
+
+Master animation concepts with interactive learning features:
+
+- **Animation breakdown** - Step through animations frame-by-frame
+- **Slow motion control** - Adjust playback speed from 0.1x to 1x
+- **Transform demo** - Toggle multiple transform properties (translate, scale, rotate, skew)
+- **Timing function visualizer** - Compare ease, linear, ease-in, ease-out, ease-in-out
+- **Animation challenges** - Test your skills with interactive exercises
+
+## What you'll learn
+
+By using the Animation Playground, you'll gain hands-on experience with:
+
+1. **Transform properties** - Learn how translate, scale, rotate, and skew affect elements
+2. **Timing functions** - Understand how easing controls the feel of animations
+3. **CSS keyframes** - Create complex multi-step animations
+4. **JavaScript animation APIs** - Master requestAnimationFrame and professional libraries
+5. **React animation patterns** - Build interactive UIs with Framer Motion and React Spring
+6. **Performance optimization** - Create smooth 60 FPS animations that run efficiently
+7. **Accessibility** - Respect user preferences like prefers-reduced-motion
+
+## Pro tips for animation development
+
+<Note>
+  Start with a clear purpose for each animation. Animations should enhance user experience, not distract from it.
+</Note>
+
+- Keep animations subtle and performant (aim for 60 FPS)
+- Use `transform` and `opacity` for hardware-accelerated animations
+- Consider accessibility - some users prefer reduced motion
+- Test animations across different devices and browsers
+- Debounce scroll handlers to maintain smooth performance
+
+## Get started
+
+Ready to start building animations? Check out the [Quickstart guide](/quickstart) to run the playground locally, or jump straight to the [Installation guide](/installation) for detailed setup instructions.

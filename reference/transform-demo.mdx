@@ -1,0 +1,80 @@
+---
+title: TransformDemo component
+description: Interactive demonstration component for CSS transform properties
+---
+
+The `TransformDemo` component provides an interactive interface for exploring CSS transform properties. Users can toggle different transforms and see the effects in real-time.
+
+## Features
+
+The component demonstrates four core transform properties:
+
+- **Translate** - Move elements along X and Y axes
+- **Rotate** - Rotate elements by degrees
+- **Scale** - Resize elements proportionally
+- **Skew** - Slant elements along X and Y axes
+
+## Component structure
+
+The component uses checkboxes to toggle each transform:
+
+```tsx
+const [activeTransforms, setActiveTransforms] = useState<TransformType[]>([])
+
+const transforms: Record<TransformType, string> = {
+  translate: 'translateX(50px) translateY(-30px)',
+  rotate: 'rotate(45deg)',
+  scale: 'scale(1.3)',
+  skew: 'skewX(10deg)'
+}
+```
+
+## Usage
+
+The component is used in the "Basics" tab of the Animation Playground:
+
+```tsx
+import TransformDemo from './components/TransformDemo'
+
+<section>
+  <h2>Transform Properties</h2>
+  <p>Experiment with different transform properties to see how they affect elements.</p>
+  <TransformDemo />
+</section>
+```
+
+## Interactive elements
+
+<CardGroup cols={2}>
+  <Card title="Transform toggles" icon="toggle-on">
+    Checkboxes allow users to combine multiple transforms
+  </Card>
+  <Card title="Visual preview" icon="eye">
+    Animated box shows the combined effect of selected transforms
+  </Card>
+  <Card title="Code display" icon="code">
+    Generated CSS code shows the transform property value
+  </Card>
+  <Card title="Reset button" icon="rotate-left">
+    Clear all transforms to start fresh
+  </Card>
+</CardGroup>
+
+## Educational value
+
+This component helps users understand:
+
+1. How different transforms affect element positioning
+2. How transforms can be combined for complex effects
+3. The CSS syntax for transform properties
+4. The visual impact of each transform type
+
+<Note>
+  Transforms do not affect document flow - other elements won't move when transforms are applied.
+</Note>
+
+## Related
+
+- [Transform concepts](/concepts/transforms)
+- [Advanced animations](/techniques/advanced-animations)
+- [Performance optimization](/reference/optimization)

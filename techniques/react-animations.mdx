@@ -1,0 +1,297 @@
+---
+title: React animations
+description: Master React animation libraries including Framer Motion and React Spring for declarative, gesture-based, and physics-driven animations
+---
+
+React animation libraries provide declarative APIs that integrate seamlessly with React's component model. They handle the complexity of animations while maintaining clean, readable code.
+
+## Framer Motion
+
+Framer Motion excels at declarative animations with a simple API, built-in gesture support, and exit animations.
+
+### Basic animation
+
+```tsx
+<motion.div
+  animate={{
+    scale: [1, 1.2, 1],
+    rotate: [0, 180, 0]
+  }}
+  transition={{
+    duration: 2,
+    ease: "easeInOut",
+    repeat: Infinity
+  }}
+  whileHover={{ scale: 1.1 }}
+  whileTap={{ scale: 0.9 }}
+/>
+```
+
+### Customizable parameters
+
+Create interactive animations with dynamic values:
+
+```tsx
+const [rotationSpeed, setRotationSpeed] = useState(2)
+const [scaleAmount, setScaleAmount] = useState(1.2)
+
+<motion.div
+  animate={{
+    scale: [1, scaleAmount, 1],
+    rotate: [0, 180, 0],
+    borderRadius: ["0%", "50%", "0%"]
+  }}
+  transition={{
+    duration: rotationSpeed,
+    ease: "easeInOut",
+    repeat: Infinity,
+    repeatDelay: 0.5
+  }}
+  whileHover={{ scale: 1.1 }}
+  whileTap={{ scale: 0.9 }}
+/>
+```
+
+### Drag and gestures
+
+Create interactive animations that respond to user gestures:
+
+```tsx
+const x = useMotionValue(0)
+const y = useMotionValue(0)
+const rotate = useTransform(x, [-100, 100], [-30, 30])
+const scale = useTransform(y, [-100, 100], [0.5, 3])
+
+<motion.div
+  drag
+  dragElastic={0.2}
+  dragConstraints={{
+    top: -100,
+    left: -100,
+    right: 100,
+    bottom: 100
+  }}
+  style={{ x, y, rotate, scale }}
+  whileDrag={{ boxShadow: "0 8px 32px rgba(0,0,0,0.2)" }}
+/>
+```
+
+### AnimatePresence
+
+Enables exit animations when components are removed from the React tree:
+
+```tsx
+<AnimatePresence mode="wait">
+  {isVisible && (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      whileHover={{ scale: 1.1, rotate: 10 }}
+      whileTap={{ scale: 0.9 }}
+    />
+  )}
+</AnimatePresence>
+```
+
+### Reorderable lists
+
+Create interactive, draggable lists with smooth animations:
+
+```tsx
+const [items, setItems] = useState(["Item 1", "Item 2", "Item 3"])
+
+<Reorder.Group axis="y" values={items} onReorder={setItems}>
+  {items.map(item => (
+    <Reorder.Item
+      key={item}
+      value={item}
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+    >
+      {item}
+    </Reorder.Item>
+  ))}
+</Reorder.Group>
+```
+
+### Scroll-based animations
+
+```tsx
+import { useScroll, useSpring } from "framer-motion"
+
+const { scrollYProgress } = useScroll()
+const scaleX = useSpring(scrollYProgress, {
+  stiffness: 100,
+  damping: 30,
+  restDelta: 0.001
+})
+
+<motion.div
+  style={{ scaleX }}
+  className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left"
+/>
+```
+
+## React Spring
+
+React Spring uses a spring-physics based animation system to create natural-looking motion with minimal configuration.
+
+### Basic usage
+
+```tsx
+import { useSpring, animated } from "@react-spring/web"
+
+const springProps = useSpring({
+  scale: isVisible ? 1 : 0,
+  opacity: isVisible ? 1 : 0,
+  config: { tension: 300, friction: 10 }
+})
+
+<animated.div style={springProps} />
+```
+
+### Configuration
+
+React Spring uses physics-based parameters:
+
+```tsx
+useSpring({
+  scale: isVisible ? 1 : 0,
+  config: {
+    tension: 300,  // Spring stiffness
+    friction: 20   // Spring damping
+  }
+})
+```
+
+## Comparison of approaches
+
+<CodeGroup>
+
+```tsx Framer Motion
+<motion.div
+  initial={{ scale: 0 }}
+  animate={{ scale: isVisible ? 1 : 0 }}
+  transition={{
+    type: "spring",
+    stiffness: 300,
+    damping: 20
+  }}
+/>
+```
+
+```tsx React Spring
+const springStyle = useSpring({
+  scale: isVisible ? 1 : 0,
+  config: {
+    tension: 300,
+    friction: 20
+  }
+})
+
+<animated.div style={springStyle} />
+```
+
+</CodeGroup>
+
+### When to use Framer Motion
+
+- Gesture-based interactions (drag, hover, tap)
+- Exit animations with AnimatePresence
+- Complex animation orchestration
+- Variants for managing animation states
+- Scroll-linked animations
+
+### When to use React Spring
+
+- Natural, physics-based motion
+- Interrupt-based animations
+- Simpler API for basic transitions
+- Better bundle size for simple use cases
+
+## Performance monitoring
+
+Track animation performance with FPS monitoring:
+
+```tsx
+const [fps, setFps] = useState(0)
+const frameRef = useRef<number>(0)
+const lastTimeRef = useRef<number>(performance.now())
+
+useEffect(() => {
+  let animationFrameId: number
+
+  const measureFPS = (timestamp: number) => {
+    frameRef.current++
+    const elapsed = timestamp - lastTimeRef.current
+
+    if (elapsed >= 1000) {
+      const currentFps = Math.round((frameRef.current * 1000) / elapsed)
+      setFps(currentFps)
+      frameRef.current = 0
+      lastTimeRef.current = timestamp
+    }
+
+    animationFrameId = requestAnimationFrame(measureFPS)
+  }
+
+  animationFrameId = requestAnimationFrame(measureFPS)
+  return () => cancelAnimationFrame(animationFrameId)
+}, [])
+```
+
+## Accessibility considerations
+
+Respect user preferences for reduced motion:
+
+```tsx
+const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
+
+<motion.div
+  animate={prefersReducedMotion ? {} : { scale: [1, 1.2, 1] }}
+  transition={{
+    duration: prefersReducedMotion ? 0 : 2
+  }}
+/>
+```
+
+### Best practices
+
+- Respect `prefers-reduced-motion` media query
+- Avoid rapid flashing animations
+- Provide alternative ways to access content
+- Use appropriate ARIA attributes
+- Test with screen readers
+
+## CSS playground
+
+Combine React state management with dynamic CSS animations:
+
+```tsx
+const [cssCode, setCssCode] = useState(`
+.animated-element {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-50px); }
+}`)
+
+const applyCSS = (css: string) => {
+  const style = document.createElement('style')
+  style.textContent = css
+  document.head.appendChild(style)
+  return () => document.head.removeChild(style)
+}
+
+useEffect(() => {
+  const cleanup = applyCSS(cssCode)
+  return cleanup
+}, [cssCode])
+```

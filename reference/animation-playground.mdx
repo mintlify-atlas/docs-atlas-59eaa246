@@ -1,0 +1,129 @@
+---
+title: AnimationPlayground component
+description: Interactive keyframe timeline editor for creating custom animations
+---
+
+The `AnimationPlayground` component is a powerful tool that lets users create custom animations by defining keyframes and adjusting properties in real-time.
+
+## Core features
+
+<CardGroup cols={2}>
+  <Card title="Keyframe editor" icon="timeline">
+    Add, remove, and reorder keyframes on a visual timeline
+  </Card>
+  <Card title="Property controls" icon="sliders">
+    Adjust x, y, scale, rotate, and opacity for each keyframe
+  </Card>
+  <Card title="Live preview" icon="play">
+    See animations play in real-time as you edit
+  </Card>
+  <Card title="Export options" icon="download">
+    Copy generated code for Framer Motion or CSS
+  </Card>
+</CardGroup>
+
+## Keyframe structure
+
+```tsx
+type KeyframeStep = {
+  id: string
+  time: number
+  properties: {
+    x: number
+    y: number
+    scale: number
+    rotate: number
+    opacity: number
+  }
+}
+```
+
+## Animation properties
+
+Each keyframe can control five properties:
+
+- **x** - Horizontal position (pixels)
+- **y** - Vertical position (pixels)  
+- **scale** - Size multiplier (1 = 100%)
+- **rotate** - Rotation angle (degrees)
+- **opacity** - Transparency (0-1)
+
+## Using the playground
+
+<Steps>
+  <Step title="Add keyframes">
+    Click "Add Keyframe" to create new animation steps. Each keyframe represents a point in time.
+  </Step>
+  
+  <Step title="Adjust properties">
+    Select a keyframe and use the sliders to adjust its properties. Changes appear immediately in the preview.
+  </Step>
+  
+  <Step title="Reorder keyframes">
+    Drag and drop keyframes to change the animation sequence using the Framer Motion Reorder component.
+  </Step>
+  
+  <Step title="Play animation">
+    Click "Play" to see your animation in action. The preview loops continuously.
+  </Step>
+  
+  <Step title="Export code">
+    Copy the generated code to use in your own projects.
+  </Step>
+</Steps>
+
+## Implementation details
+
+The component uses Framer Motion for the animation system:
+
+```tsx
+<motion.div
+  animate={isPlaying ? {
+    x: getAnimationValues('x'),
+    y: getAnimationValues('y'),
+    scale: getAnimationValues('scale'),
+    rotate: getAnimationValues('rotate'),
+    opacity: getAnimationValues('opacity')
+  } : selectedKeyframe?.properties}
+  transition={{
+    duration: keyframes.length,
+    times: keyframes.map(k => k.time / keyframes.length),
+    repeat: Infinity
+  }}
+/>
+```
+
+## Export formats
+
+### Framer Motion
+
+```tsx
+<motion.div
+  animate={{
+    x: [0, 100, 0],
+    y: [0, -50, 0],
+    scale: [1, 1.5, 1]
+  }}
+  transition={{ duration: 2 }}
+/>
+```
+
+### CSS Keyframes
+
+```css
+@keyframes custom-animation {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(100px, -50px) scale(1.5); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+```
+
+<Note>
+  The playground helps you understand how keyframe-based animations work before implementing them in code.
+</Note>
+
+## Related
+
+- [Keyframes concept](/concepts/keyframes)
+- [Framer Motion library](/libraries/framer-motion)
+- [Animation examples](/examples/fade-in)

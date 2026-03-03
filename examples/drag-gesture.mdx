@@ -1,0 +1,400 @@
+---
+title: Drag gesture animation
+description: Create interactive drag-and-drop experiences with physics-based motion and constraints
+---
+
+## Live demo
+
+Drag gestures enable users to directly manipulate elements by clicking and dragging them across the screen. With proper physics and constraints, drag interactions feel natural and intuitive.
+
+<Note>
+  Always provide visual feedback during drag operations and respect drag constraints to prevent elements from leaving their containers.
+</Note>
+
+## Complete code example
+
+<Tabs>
+  <Tab title="Framer Motion">
+    ```tsx
+    import { motion, useMotionValue, useTransform } from 'framer-motion'
+
+    export default function DragDemo() {
+      const x = useMotionValue(0)
+      const y = useMotionValue(0)
+      const rotate = useTransform(x, [-100, 100], [-30, 30])
+      const scale = useTransform(y, [-100, 100], [0.5, 3])
+
+      return (
+        <div className="h-96 relative bg-gray-50 rounded-lg flex items-center justify-center">
+          <motion.div
+            drag
+            dragElastic={0.2}
+            dragConstraints={{
+              top: -100,
+              left: -100,
+              right: 100,
+              bottom: 100
+            }}
+            style={{ x, y, rotate, scale }}
+            whileDrag={{ boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}
+            className="w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg cursor-grab active:cursor-grabbing"
+          />
+          <p className="absolute bottom-4 text-sm text-gray-500">
+            Drag the box around
+          </p>
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="With Snap Points">
+    ```tsx
+    import { motion } from 'framer-motion'
+    import { useState } from 'react'
+
+    export default function SnapDragDemo() {
+      const [position, setPosition] = useState({ x: 0, y: 0 })
+
+      return (
+        <div className="h-96 relative bg-gray-50 rounded-lg">
+          {/* Drop zones */}
+          <div className="grid grid-cols-3 h-full gap-4 p-4">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="border-2 border-dashed border-gray-300 rounded-lg"
+              />
+            ))}
+          </div>
+
+          {/* Draggable element */}
+          <motion.div
+            drag
+            dragSnapToOrigin
+            onDragEnd={(e, info) => {
+              setPosition({ x: info.offset.x, y: info.offset.y })
+            }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-blue-500 rounded-lg cursor-grab active:cursor-grabbing"
+          />
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Axis Constraint">
+    ```tsx
+    import { motion } from 'framer-motion'
+
+    export default function AxisDragDemo() {
+      return (
+        <div className="space-y-8 p-8">
+          {/* Horizontal only */}
+          <div className="relative h-24 bg-gray-50 rounded-lg flex items-center px-4">
+            <motion.div
+              drag="x"
+              dragConstraints={{ left: 0, right: 300 }}
+              className="w-20 h-20 bg-blue-500 rounded-lg cursor-grab active:cursor-grabbing"
+            />
+            <span className="absolute right-4 text-sm text-gray-500">
+              Drag horizontally
+            </span>
+          </div>
+
+          {/* Vertical only */}
+          <div className="relative h-64 w-24 bg-gray-50 rounded-lg flex flex-col items-center py-4">
+            <motion.div
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 200 }}
+              className="w-20 h-20 bg-green-500 rounded-lg cursor-grab active:cursor-grabbing"
+            />
+            <span className="absolute bottom-4 text-sm text-gray-500 transform -rotate-90 whitespace-nowrap">
+              Drag vertically
+            </span>
+          </div>
+        </div>
+      )
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## How it works
+
+Drag gestures combine event handling with physics:
+
+<Steps>
+  <Step title="Enable drag">
+    Add the `drag` prop to make an element draggable. Use `drag="x"` or `drag="y"` to constrain to one axis.
+  </Step>
+  
+  <Step title="Set constraints">
+    Define boundaries with `dragConstraints` to prevent elements from leaving designated areas.
+  </Step>
+  
+  <Step title="Add elasticity">
+    Use `dragElastic` to create a rubber-band effect when dragging beyond constraints.
+  </Step>
+  
+  <Step title="Apply transforms">
+    Link motion values to create dynamic effects like rotation or scaling during drag.
+  </Step>
+</Steps>
+
+### Key drag properties
+
+<CardGroup cols={2}>
+  <Card title="drag" icon="hand-pointer">
+    Enable dragging: `true`, `"x"`, or `"y"`
+  </Card>
+  
+  <Card title="dragConstraints" icon="border-all">
+    Boundaries: `{ top, left, right, bottom }` or ref to container
+  </Card>
+  
+  <Card title="dragElastic" icon="wave-square">
+    Elasticity: 0 (none) to 1 (full bounce)
+  </Card>
+  
+  <Card title="dragMomentum" icon="rocket">
+    Enable/disable momentum after release
+  </Card>
+</CardGroup>
+
+## Variations
+
+### Swipeable cards
+
+Tinder-style card swiping:
+
+```tsx
+import { motion, useMotionValue, useTransform } from 'framer-motion'
+import { useState } from 'react'
+
+function SwipeCard({ onSwipe }) {
+  const x = useMotionValue(0)
+  const rotate = useTransform(x, [-200, 200], [-50, 50])
+  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0])
+
+  return (
+    <motion.div
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      style={{ x, rotate, opacity }}
+      onDragEnd={(e, { offset, velocity }) => {
+        if (Math.abs(offset.x) > 100) {
+          onSwipe(offset.x > 0 ? 'right' : 'left')
+        }
+      }}
+      className="w-80 h-96 bg-white rounded-xl shadow-xl p-6"
+    >
+      Card Content
+    </motion.div>
+  )
+}
+```
+
+### Draggable slider
+
+Custom range input:
+
+```tsx
+import { motion, useMotionValue, useTransform } from 'framer-motion'
+import { useEffect, useState } from 'react'
+
+function DragSlider({ min = 0, max = 100, onChange }) {
+  const x = useMotionValue(0)
+  const value = useTransform(x, [0, 200], [min, max])
+  const [displayValue, setDisplayValue] = useState(min)
+
+  useEffect(() => {
+    return value.onChange(v => {
+      setDisplayValue(Math.round(v))
+      onChange?.(Math.round(v))
+    })
+  }, [])
+
+  return (
+    <div className="relative w-64 h-12 flex items-center">
+      <div className="absolute w-full h-1 bg-gray-200 rounded" />
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: 200 }}
+        dragElastic={0}
+        style={{ x }}
+        className="w-12 h-12 bg-blue-500 rounded-full cursor-grab active:cursor-grabbing flex items-center justify-center text-white font-bold"
+      >
+        {displayValue}
+      </motion.div>
+    </div>
+  )
+}
+```
+
+### Drag to reorder list
+
+Sortable list items:
+
+```tsx
+import { Reorder } from 'framer-motion'
+import { useState } from 'react'
+
+function SortableList() {
+  const [items, setItems] = useState(['Item 1', 'Item 2', 'Item 3', 'Item 4'])
+
+  return (
+    <Reorder.Group axis="y" values={items} onReorder={setItems}>
+      {items.map((item) => (
+        <Reorder.Item
+          key={item}
+          value={item}
+          className="p-4 mb-2 bg-white rounded-lg shadow cursor-grab active:cursor-grabbing"
+        >
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M7 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 14zm6-8a2 2 0 1 0-.001-4.001A2 2 0 0 0 13 6zm0 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 14z" />
+            </svg>
+            {item}
+          </div>
+        </Reorder.Item>
+      ))}
+    </Reorder.Group>
+  )
+}
+```
+
+## Example from the playground
+
+From the ReactAnimations component:
+
+```tsx
+import { motion, useMotionValue, useTransform } from 'framer-motion'
+
+function DragGestureDemo() {
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const rotate = useTransform(x, [-100, 100], [-30, 30])
+  const scale = useTransform(y, [-100, 100], [0.5, 3])
+
+  return (
+    <div className="h-96 relative bg-gray-50 rounded-lg flex items-center justify-center">
+      <motion.div
+        drag
+        dragElastic={0.2}
+        dragConstraints={{
+          top: -100,
+          left: -100,
+          right: 100,
+          bottom: 100
+        }}
+        style={{ x, y, rotate, scale }}
+        className="w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg cursor-grab active:cursor-grabbing"
+        whileDrag={{ boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}
+      />
+    </div>
+  )
+}
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Provide visual feedback">
+    Use cursor changes, shadows, or scale to indicate draggable elements.
+    
+    ```tsx
+    <motion.div
+      drag
+      whileDrag={{ scale: 1.1, boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}
+      className="cursor-grab active:cursor-grabbing"
+    />
+    ```
+  </Accordion>
+  
+  <Accordion title="Set appropriate constraints">
+    Always constrain drag boundaries to prevent elements from leaving the viewport.
+    
+    ```tsx
+    // Using container ref
+    const containerRef = useRef(null)
+    <motion.div drag dragConstraints={containerRef} />
+    ```
+  </Accordion>
+  
+  <Accordion title="Add momentum carefully">
+    Momentum can make dragging feel natural but may confuse drop zones. Disable when needed.
+    
+    ```tsx
+    <motion.div drag dragMomentum={false} />
+    ```
+  </Accordion>
+  
+  <Accordion title="Handle mobile and touch">
+    Framer Motion handles touch automatically, but ensure hit targets are large enough (44x44px minimum).
+  </Accordion>
+</AccordionGroup>
+
+## Common use cases
+
+- Swipeable cards (Tinder-style)
+- Drag-to-reorder lists
+- Custom sliders and range inputs
+- Movable widgets and panels
+- Drawing and annotation tools
+- Game controls
+- Image cropping tools
+- Kanban boards
+
+## Performance tips
+
+<Warning>
+  Drag operations use motion values which are optimized for performance. Avoid reading motion values on every frame in render.
+</Warning>
+
+```tsx
+// Good - use onChange callback
+const x = useMotionValue(0)
+useEffect(() => {
+  return x.onChange(latest => console.log(latest))
+}, [])
+
+// Avoid - reads on every render
+const x = useMotionValue(0)
+const currentX = x.get() // Don't do this in render
+```
+
+## Accessibility considerations
+
+- Provide keyboard alternatives for drag operations
+- Announce drag state changes to screen readers
+- Ensure draggable elements have sufficient contrast
+- Add ARIA attributes for drag-and-drop zones
+
+```tsx
+<motion.div
+  drag
+  role="button"
+  aria-label="Draggable card"
+  tabIndex={0}
+  onKeyDown={(e) => {
+    // Handle arrow keys for keyboard users
+  }}
+/>
+```
+
+## Related examples
+
+<CardGroup cols={3}>
+  <Card title="Scroll animation" icon="scroll" href="/examples/scroll-animation">
+    Scroll-triggered animations
+  </Card>
+  
+  <Card title="Slide in" icon="arrow-right" href="/examples/slide-in">
+    Directional animations
+  </Card>
+  
+  <Card title="Scale" icon="expand" href="/examples/scale">
+    Size transformations
+  </Card>
+</CardGroup>

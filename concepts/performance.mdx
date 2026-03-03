@@ -1,0 +1,489 @@
+---
+title: Performance optimization
+description: Learn techniques to create smooth, high-performance web animations that maintain 60 FPS
+---
+
+Performance is critical for animations. Janky, stuttering animations create a poor user experience and make your application feel slow. This guide covers techniques to keep animations smooth and performant.
+
+## Understanding FPS (frames per second)
+
+Smooth animations run at 60 FPS (frames per second), which means the browser needs to render a new frame every 16.67ms. If any frame takes longer than this, you'll see stuttering.
+
+### The render pipeline
+
+Every frame, the browser may need to:
+1. **JavaScript** - Execute JS code
+2. **Style** - Calculate which CSS rules apply
+3. **Layout** - Calculate element positions and sizes
+4. **Paint** - Fill in pixels (text, colors, images)
+5. **Composite** - Draw layers in the correct order
+
+<Warning>
+  Different CSS properties trigger different parts of this pipeline. Some are much more expensive than others.
+</Warning>
+
+## FPS monitoring
+
+The Animation Playground includes a real-time FPS monitor:
+
+```tsx
+import { useEffect, useRef, useState } from 'react'
+
+type PerformanceMetric = {
+  fps: number
+  timestamp: number
+}
+
+export default function PerformanceMetrics() {
+  const [metrics, setMetrics] = useState<PerformanceMetric[]>([])
+  const [isMonitoring, setIsMonitoring] = useState(false)
+  const frameRef = useRef<number | null>(null)
+  const lastTimeRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!isMonitoring) {
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current)
+      }
+      return
+    }
+
+    const measureFPS = (timestamp: number) => {
+      if (lastTimeRef.current) {
+        const delta = timestamp - lastTimeRef.current
+        const fps = Math.round(1000 / delta)
+
+        setMetrics(prev => [
+          ...prev.slice(-50),
+          { fps, timestamp }
+        ])
+      }
+
+      lastTimeRef.current = timestamp
+      frameRef.current = requestAnimationFrame(measureFPS)
+    }
+
+    frameRef.current = requestAnimationFrame(measureFPS)
+
+    return () => {
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current)
+      }
+    }
+  }, [isMonitoring])
+
+  const averageFPS = metrics.length > 0
+    ? Math.round(metrics.reduce((sum, m) => sum + m.fps, 0) / metrics.length)
+    : 0
+
+  return (
+    <div>
+      <span>{averageFPS} FPS</span>
+      <button onClick={() => setIsMonitoring(!isMonitoring)}>
+        {isMonitoring ? 'Stop Monitoring' : 'Start Monitoring'}
+      </button>
+    </div>
+  )
+}
+```
+
+## Hardware acceleration
+
+Modern browsers can offload certain animations to the GPU (Graphics Processing Unit), which is much faster than the CPU for visual operations.
+
+### Properties that trigger GPU acceleration
+
+**Transform** and **opacity** are the only properties guaranteed to be GPU-accelerated:
+
+```css
+/* GPU accelerated ✓ */
+.element {
+  transform: translate(100px, 50px);
+  opacity: 0.5;
+}
+```
+
+**Avoid animating these properties** (they trigger layout or paint):
+
+```css
+/* CPU intensive ✗ */
+.element {
+  top: 100px;        /* triggers layout */
+  left: 50px;        /* triggers layout */
+  width: 200px;      /* triggers layout */
+  height: 100px;     /* triggers layout */
+  background: red;   /* triggers paint */
+  color: blue;       /* triggers paint */
+}
+```
+
+### Performance comparison example
+
+From the Animation Playground:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+export default function PerformanceComparison() {
+  const [animationCount, setAnimationCount] = useState(10)
+  const [useTransform, setUseTransform] = useState(true)
+
+  return (
+    <div>
+      {Array.from({ length: animationCount }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="w-4 h-4 bg-blue-500"
+          animate={useTransform ? {
+            x: [0, 100, 0],     // GPU accelerated ✓
+            y: [0, 100, 0]
+          } : {
+            left: ['0px', '100px', '0px'],   // CPU intensive ✗
+            top: ['0px', '100px', '0px']
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            delay: i * 0.1
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+```
+
+<Note>
+  With 100 elements, using `transform` maintains 60 FPS while `top/left` drops to 20-30 FPS.
+</Note>
+
+## The will-change property
+
+`will-change` tells the browser which properties will animate, allowing it to optimize ahead of time.
+
+### When to use will-change
+
+```css
+.element {
+  will-change: transform, opacity;
+}
+```
+
+**Use when:**
+- An element will animate frequently
+- Performance issues exist without it
+- Animation happens in response to user interaction
+
+**Don't use when:**
+- Applying to many elements (creates too many layers)
+- The animation is one-time or rare
+- You haven't measured a performance issue
+
+<Warning>
+  Overusing `will-change` can hurt performance by creating too many compositor layers. Use it sparingly.
+</Warning>
+
+### Proper will-change usage
+
+```css
+/* Add before animation starts */
+.element:hover {
+  will-change: transform;
+}
+
+/* Remove after animation completes */
+.element:not(:hover) {
+  will-change: auto;
+}
+```
+
+Or with JavaScript:
+
+```javascript
+const element = document.querySelector('.element')
+
+// Before animation
+element.style.willChange = 'transform'
+
+// After animation completes
+element.addEventListener('transitionend', () => {
+  element.style.willChange = 'auto'
+})
+```
+
+## RequestAnimationFrame vs CSS
+
+Choose the right animation approach for your use case.
+
+### CSS animations/transitions
+
+**Pros:**
+- Run on a separate thread from JavaScript
+- Automatically optimized by the browser  
+- Simple syntax for common animations
+- Better battery life on mobile
+
+**Cons:**
+- Limited control over playback
+- Harder to sync with JavaScript logic
+- Can't animate all properties
+
+**Best for:** Simple UI transitions, hover effects, loading states
+
+```css
+.button {
+  transition: transform 0.2s ease-out;
+}
+
+.button:hover {
+  transform: scale(1.05);
+}
+```
+
+### RequestAnimationFrame
+
+**Pros:**
+- Complete control over animation logic
+- Can animate any value (not just CSS properties)
+- Easy to sync with other JavaScript
+- Pause/resume/seek capabilities
+
+**Cons:**
+- Runs on main thread (competes with JavaScript)
+- More code required
+- Can block if JavaScript is busy
+
+**Best for:** Complex animations, games, data visualizations, scroll-based animations
+
+```javascript
+function animate(timestamp) {
+  // Update animation state
+  const progress = (timestamp - startTime) / duration
+  element.style.transform = `translateX(${progress * 100}px)`
+  
+  if (progress < 1) {
+    requestAnimationFrame(animate)
+  }
+}
+
+requestAnimationFrame(animate)
+```
+
+### Framer Motion (best of both)
+
+Framer Motion automatically chooses the best approach:
+
+```tsx
+<motion.div
+  animate={{ x: 100 }}
+  transition={{ duration: 0.5 }}
+/>
+```
+
+This uses CSS transforms when possible, falling back to JavaScript when needed.
+
+## Common performance pitfalls
+
+### Pitfall 1: Animating layout properties
+
+**Bad:**
+```css
+.element {
+  transition: width 0.3s;
+}
+
+.element:hover {
+  width: 200px;
+}
+```
+
+**Good:**
+```css
+.element {
+  transition: transform 0.3s;
+}
+
+.element:hover {
+  transform: scaleX(1.5);
+}
+```
+
+### Pitfall 2: Too many simultaneous animations
+
+**Bad:**
+```tsx
+{items.map(item => (
+  <motion.div
+    animate={{ x: [0, 100, 0] }}
+    transition={{ repeat: Infinity }}
+  />
+))}
+```
+
+**Good:**
+```tsx
+{items.map((item, i) => (
+  <motion.div
+    animate={{ x: [0, 100, 0] }}
+    transition={{ 
+      repeat: Infinity,
+      delay: i * 0.1  // Stagger for better performance
+    }}
+  />
+))}
+```
+
+### Pitfall 3: Large paint areas
+
+**Bad:**
+```css
+.full-screen-gradient {
+  background: linear-gradient(...);
+  animation: shift 5s infinite;
+}
+
+@keyframes shift {
+  to { background-position: 100% 100%; }
+}
+```
+
+**Good:**
+```css
+.small-element {
+  background: linear-gradient(...);
+  animation: shift 5s infinite;
+  width: 100px;
+  height: 100px;
+}
+```
+
+### Pitfall 4: Not cleaning up animations
+
+**Bad:**
+```javascript
+setInterval(() => {
+  element.style.transform = `rotate(${rotation}deg)`
+  rotation += 1
+}, 16)
+```
+
+**Good:**
+```javascript
+let animationId
+
+function animate() {
+  element.style.transform = `rotate(${rotation}deg)`
+  rotation += 1
+  animationId = requestAnimationFrame(animate)
+}
+
+animate()
+
+// Clean up when done
+cancelAnimationFrame(animationId)
+```
+
+## Performance tips from the Animation Playground
+
+Here are the key tips displayed in the app:
+
+<Tabs>
+  <Tab title="Use transform and opacity">
+    These properties are optimized by browsers and can be hardware accelerated.
+    
+    ```css
+    /* Fast */
+    .element {
+      transform: translate(100px, 50px);
+      opacity: 0.5;
+    }
+    ```
+  </Tab>
+  <Tab title="Promote to new layer">
+    Use `will-change` or `transform3d` to create a new compositor layer for heavy animations.
+    
+    ```css
+    .element {
+      will-change: transform;
+      /* or */
+      transform: translateZ(0);
+    }
+    ```
+  </Tab>
+  <Tab title="Debounce scroll handlers">
+    Limit the frequency of scroll-based animations to maintain smooth performance.
+    
+    ```javascript
+    let ticking = false
+    
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          updateScrollAnimation()
+          ticking = false
+        })
+        ticking = true
+      }
+    })
+    ```
+  </Tab>
+  <Tab title="Reduce paint area">
+    Minimize the size of animated elements and the area that needs to be repainted.
+    
+    ```css
+    /* Animate small elements */
+    .small-loader {
+      width: 40px;
+      height: 40px;
+    }
+    
+    /* Not entire sections */
+    .full-page {
+      width: 100vw;
+      height: 100vh;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Measuring performance
+
+### Chrome DevTools Performance tab
+
+1. Open DevTools (F12)
+2. Go to Performance tab
+3. Click Record
+4. Trigger your animation
+5. Stop recording
+6. Look for:
+   - **Long tasks** (red bars) - JavaScript blocking the main thread
+   - **Frames** - Should be under 16ms each
+   - **Paint** and **Layout** - Should be minimal during animation
+
+### Rendering panel
+
+1. Open DevTools
+2. Press Ctrl+Shift+P (Cmd+Shift+P on Mac)
+3. Type "Show Rendering"
+4. Enable:
+   - **Paint flashing** - Green highlights show repainted areas
+   - **FPS meter** - Real-time FPS display
+   - **Layout Shift Regions** - Shows layout recalculations
+
+<Note>
+  Use the Chrome DevTools Performance and Rendering panels to identify and fix animation performance issues.
+</Note>
+
+## Best practices summary
+
+1. **Animate only transform and opacity** - These are GPU-accelerated
+2. **Use CSS for simple animations** - Better performance than JavaScript
+3. **Use requestAnimationFrame for complex animations** - Better than setTimeout/setInterval
+4. **Limit will-change usage** - Only when needed
+5. **Reduce simultaneous animations** - Stagger or limit count
+6. **Minimize paint areas** - Smaller elements = faster repaints
+7. **Clean up animations** - Cancel animations when components unmount
+8. **Test on real devices** - Mobile performance differs from desktop
+9. **Monitor FPS** - Aim for consistent 60 FPS
+10. **Use DevTools** - Measure before optimizing

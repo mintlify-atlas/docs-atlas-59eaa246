@@ -1,0 +1,303 @@
+---
+title: Optimization
+description: Techniques and best practices for creating smooth, performant animations at 60 FPS
+---
+
+Smooth animations require careful optimization. This guide covers techniques to achieve consistent 60 FPS performance.
+
+## Hardware acceleration
+
+Modern browsers can offload certain CSS properties to the GPU, dramatically improving performance.
+
+### GPU-accelerated properties
+
+Only these properties are GPU-accelerated:
+
+- `transform` (translate, rotate, scale, skew)
+- `opacity`
+- `filter` (with caution)
+
+### Compare performance
+
+<Tabs>
+  <Tab title="❌ Slow (causes layout)">
+    ```css
+    .element {
+      /* These trigger layout recalculation */
+      left: 100px;
+      top: 50px;
+      width: 200px;
+      height: 150px;
+    }
+    ```
+  </Tab>
+  
+  <Tab title="✅ Fast (GPU-accelerated)">
+    ```css
+    .element {
+      /* These use the GPU compositor */
+      transform: translate(100px, 50px);
+      opacity: 0.8;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## The rendering pipeline
+
+Understanding browser rendering helps you optimize:
+
+<Steps>
+  <Step title="Layout (reflow)">
+    Browser calculates element positions and sizes. **Most expensive.**
+    
+    Triggered by: width, height, padding, margin, position, top, left, etc.
+  </Step>
+  
+  <Step title="Paint">
+    Browser draws pixels (colors, images, text, shadows).
+    
+    Triggered by: color, background, box-shadow, border-radius, etc.
+  </Step>
+  
+  <Step title="Composite">
+    Browser combines layers into final image. **Least expensive.**
+    
+    Triggered by: transform, opacity only.
+  </Step>
+</Steps>
+
+<Info>
+  Aim for animations that only trigger the Composite step. Use [CSS Triggers](https://csstriggers.com/) to check which properties trigger which steps.
+</Info>
+
+## Using will-change
+
+The `will-change` property tells the browser to optimize for upcoming animations.
+
+### Correct usage
+
+```css
+.element {
+  /* Don't: Applying permanently wastes memory */
+  /* will-change: transform; */
+}
+
+.element:hover {
+  /* Do: Apply just before animation */
+  will-change: transform;
+}
+
+.element.animating {
+  will-change: transform;
+  animation: slide 0.5s;
+}
+
+.element.animation-end {
+  /* Do: Remove after animation completes */
+  will-change: auto;
+}
+```
+
+### JavaScript approach
+
+```tsx
+const element = useRef<HTMLDivElement>(null)
+
+const handleAnimate = () => {
+  // Add will-change before animation
+  element.current.style.willChange = 'transform'
+  
+  setTimeout(() => {
+    // Trigger animation
+    element.current.classList.add('animating')
+    
+    // Remove will-change after animation
+    setTimeout(() => {
+      element.current.style.willChange = 'auto'
+    }, 500)
+  }, 0)
+}
+```
+
+<Warning>
+  Using `will-change` on too many elements can hurt performance. The browser needs to create separate compositor layers, which consume memory.
+</Warning>
+
+## RequestAnimationFrame vs CSS
+
+Choose the right animation method:
+
+### Use CSS animations when:
+
+- Simple, predefined animations
+- No complex logic needed
+- Want best performance
+- Need browser to optimize automatically
+
+```css
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.element {
+  animation: fade 0.5s ease-out;
+}
+```
+
+### Use requestAnimationFrame when:
+
+- Dynamic values that change based on input
+- Complex timing logic
+- Need precise control over each frame
+- Coordinating with Canvas or WebGL
+
+```tsx
+const animate = () => {
+  // Update state based on current time
+  position += velocity
+  
+  element.style.transform = `translateX(${position}px)`
+  
+  if (position < target) {
+    requestAnimationFrame(animate)
+  }
+}
+
+requestAnimationFrame(animate)
+```
+
+## Avoiding layout thrashing
+
+Layout thrashing occurs when you repeatedly read and write to the DOM in the same frame.
+
+### ❌ Thrashing example
+
+```tsx
+elements.forEach(element => {
+  const height = element.offsetHeight  // Read (forces layout)
+  element.style.height = height + 10 + 'px'  // Write
+  // Browser recalculates layout between each iteration!
+})
+```
+
+### ✅ Optimized approach
+
+```tsx
+// Batch reads
+const heights = elements.map(el => el.offsetHeight)
+
+// Then batch writes
+elements.forEach((element, i) => {
+  element.style.height = heights[i] + 10 + 'px'
+})
+```
+
+## Debouncing and throttling
+
+Limit how often animations run during scroll or resize events.
+
+### Throttle scroll animations
+
+```tsx
+import { useScroll, useTransform } from 'framer-motion'
+
+const { scrollY } = useScroll()
+const y = useTransform(scrollY, [0, 300], [0, 100])
+
+// Framer Motion automatically throttles these updates
+```
+
+### Debounce resize
+
+```tsx
+const [size, setSize] = useState({ width: 0, height: 0 })
+
+useEffect(() => {
+  let timeoutId: NodeJS.Timeout
+  
+  const handleResize = () => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }, 150)
+  }
+  
+  window.addEventListener('resize', handleResize)
+  return () => window.removeEventListener('resize', handleResize)
+}, [])
+```
+
+## Reducing paint areas
+
+Smaller paint areas = better performance.
+
+<Tabs>
+  <Tab title="Large paint area">
+    ```css
+    .container {
+      /* Animating background repaints entire container */
+      background: linear-gradient(...);
+      animation: gradient-shift 3s infinite;
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Small paint area">
+    ```css
+    .container::before {
+      content: '';
+      /* Pseudo-element isolates paint to a layer */
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(...);
+      animation: gradient-shift 3s infinite;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Chrome DevTools profiling
+
+<Steps>
+  <Step title="Open Performance panel">
+    Press F12 → Performance tab → Click Record
+  </Step>
+  
+  <Step title="Record animation">
+    Trigger your animation while recording
+  </Step>
+  
+  <Step title="Analyze results">
+    Look for:
+    - Long tasks (over 16ms = dropped frames)
+    - Purple bars (layout recalculations)
+    - Green bars (paint operations)
+    - FPS graph (should stay at 60)
+  </Step>
+</Steps>
+
+## Quick optimization checklist
+
+- [ ] Use `transform` and `opacity` instead of position/size properties
+- [ ] Apply `will-change` only during animations
+- [ ] Batch DOM reads and writes separately
+- [ ] Use CSS animations for simple, declarative effects
+- [ ] Use `requestAnimationFrame` for complex, dynamic animations
+- [ ] Debounce/throttle scroll and resize handlers
+- [ ] Reduce the number of simultaneous animations
+- [ ] Test on lower-end devices, not just your development machine
+
+<Tip>
+  The Animation Playground includes a real-time FPS monitor (PerformanceMetrics component) to help you identify performance issues.
+</Tip>
+
+## Related
+
+- [Performance concepts](/concepts/performance)
+- [Performance metrics tool](/tools/performance-metrics)
+- [Accessibility](/reference/accessibility)

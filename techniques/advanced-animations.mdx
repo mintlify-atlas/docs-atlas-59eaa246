@@ -1,0 +1,412 @@
+---
+title: Advanced animations
+description: Combine multiple animation properties, create gesture-based interactions, and orchestrate complex animation sequences for sophisticated effects
+---
+
+Advanced animations combine multiple properties, timing functions, and interactions to create sophisticated visual effects. Master these techniques to build professional-grade animation experiences.
+
+## Combining multiple properties
+
+Create rich animations by orchestrating multiple CSS properties simultaneously.
+
+### Scale animation
+
+```tsx
+const scaleAnimation = {
+  animate: { scale: [1, 1.5, 0.5, 1] },
+  transition: { 
+    duration: 2,
+    repeat: Infinity,
+    repeatType: "loop" as const
+  }
+}
+
+<motion.div
+  animate={scaleAnimation.animate}
+  transition={scaleAnimation.transition}
+/>
+```
+
+### Rotation animation
+
+```tsx
+const rotateAnimation = {
+  animate: { rotate: [0, 180, -180, 0] },
+  transition: { 
+    duration: 2,
+    repeat: Infinity,
+    repeatType: "loop" as const,
+    ease: "linear"
+  }
+}
+```
+
+### Fade with scale
+
+Combine opacity and scale for smooth fade effects:
+
+```tsx
+const fadeAnimation = {
+  animate: { 
+    opacity: [1, 0.2, 1], 
+    scale: [1, 0.9, 1] 
+  },
+  transition: { 
+    duration: 1.5,
+    repeat: Infinity,
+    repeatType: "reverse" as const,
+    ease: "easeInOut"
+  }
+}
+```
+
+### Bounce with scale
+
+```tsx
+const bounceAnimation = {
+  animate: { 
+    y: [0, -50, 0], 
+    scale: [1, 0.9, 1] 
+  },
+  transition: { 
+    duration: 0.8,
+    repeat: Infinity,
+    repeatType: "reverse" as const,
+    ease: "easeOut"
+  }
+}
+```
+
+### 3D flip animation
+
+```tsx
+const flipAnimation = {
+  animate: { rotateY: [0, 360] },
+  transition: { 
+    duration: 1.5,
+    repeat: Infinity,
+    repeatType: "loop" as const,
+    ease: "easeInOut"
+  }
+}
+
+<motion.div
+  animate={flipAnimation.animate}
+  transition={flipAnimation.transition}
+  style={{ 
+    transformStyle: 'preserve-3d',
+    backfaceVisibility: 'visible'
+  }}
+/>
+```
+
+## Gesture-based animations
+
+Create interactive animations that respond to user input with real-time transformations.
+
+### Drag with transformations
+
+```tsx
+const x = useMotionValue(0)
+const y = useMotionValue(0)
+const rotate = useTransform(x, [-100, 100], [-30, 30])
+const scale = useTransform(y, [-100, 100], [0.5, 3])
+
+<motion.div
+  drag
+  dragElastic={0.2}
+  dragConstraints={{
+    top: -100,
+    left: -100,
+    right: 100,
+    bottom: 100
+  }}
+  style={{ x, y, rotate, scale }}
+  whileDrag={{ boxShadow: "0 8px 32px rgba(0,0,0,0.2)" }}
+/>
+```
+
+### Interactive controls
+
+Let users control animation parameters in real-time:
+
+```tsx
+const [rotationSpeed, setRotationSpeed] = useState(2)
+const [scaleAmount, setScaleAmount] = useState(1.2)
+
+<motion.div
+  animate={{
+    scale: [1, scaleAmount, 1],
+    rotate: [0, 180, 0],
+    borderRadius: ["0%", "50%", "0%"]
+  }}
+  transition={{
+    duration: rotationSpeed,
+    ease: "easeInOut",
+    repeat: Infinity,
+    repeatDelay: 0.5
+  }}
+  whileHover={{ scale: 1.1 }}
+  whileTap={{ scale: 0.9 }}
+/>
+```
+
+## Scroll-triggered animations
+
+Link animations to scroll position for immersive experiences:
+
+```tsx
+import { useScroll, useSpring } from "framer-motion"
+
+const { scrollYProgress } = useScroll()
+const scaleX = useSpring(scrollYProgress, {
+  stiffness: 100,
+  damping: 30,
+  restDelta: 0.001
+})
+
+<motion.div
+  style={{ scaleX }}
+  className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left"
+/>
+```
+
+## Animation orchestration
+
+Manage multiple animations with a unified control system.
+
+### Toggle multiple animations
+
+```tsx
+type AnimationType = 'scale' | 'rotate' | 'fade' | 'bounce' | 'flip'
+
+const [activeAnimations, setActiveAnimations] = useState<AnimationType[]>([])
+
+const animations: Record<AnimationType, AnimationConfig> = {
+  scale: {
+    animate: { scale: [1, 1.5, 0.5, 1] },
+    transition: { 
+      duration: 2,
+      repeat: Infinity,
+      repeatType: "loop" as const
+    }
+  },
+  rotate: {
+    animate: { rotate: [0, 180, -180, 0] },
+    transition: { 
+      duration: 2,
+      repeat: Infinity,
+      repeatType: "loop" as const,
+      ease: "linear"
+    }
+  },
+  fade: {
+    animate: { opacity: [1, 0.2, 1], scale: [1, 0.9, 1] },
+    transition: { 
+      duration: 1.5,
+      repeat: Infinity,
+      repeatType: "reverse" as const,
+      ease: "easeInOut"
+    }
+  },
+  bounce: {
+    animate: { y: [0, -50, 0], scale: [1, 0.9, 1] },
+    transition: { 
+      duration: 0.8,
+      repeat: Infinity,
+      repeatType: "reverse" as const,
+      ease: "easeOut"
+    }
+  },
+  flip: {
+    animate: { rotateY: [0, 360] },
+    transition: { 
+      duration: 1.5,
+      repeat: Infinity,
+      repeatType: "loop" as const,
+      ease: "easeInOut"
+    }
+  }
+}
+
+const toggleAnimation = (type: AnimationType) => {
+  setActiveAnimations(prev =>
+    prev.includes(type)
+      ? prev.filter(t => t !== type)
+      : [...prev, type]
+  )
+}
+```
+
+### Conditional animation rendering
+
+```tsx
+<motion.div
+  initial={false}
+  animate={activeAnimations.includes(type) ? animations[type].animate : {}}
+  transition={animations[type].transition}
+  style={{ 
+    transformStyle: 'preserve-3d',
+    backfaceVisibility: 'visible'
+  }}
+/>
+```
+
+## Animation breakdown
+
+Debug complex animations by breaking them down into individual steps:
+
+```tsx
+const [progress, setProgress] = useState(0)
+const [isPlaying, setIsPlaying] = useState(false)
+
+// Calculate animation values based on progress
+const translateY = -50 * Math.sin(progress * Math.PI)
+const opacity = 0.5 + 0.5 * Math.sin(progress * Math.PI * 2)
+const scale = 1 + 0.3 * Math.sin(progress * Math.PI)
+
+<motion.div
+  animate={{ 
+    y: translateY,
+    scale: scale,
+    opacity: opacity 
+  }}
+/>
+```
+
+### Frame-by-frame control
+
+```tsx
+const [selectedSpeed, setSelectedSpeed] = useState<'slow' | 'normal' | 'frame-by-frame'>('normal')
+
+const speeds = {
+  'slow': 0.25,
+  'normal': 1,
+  'frame-by-frame': 0
+}
+
+const advanceFrame = () => {
+  setProgress(prev => Math.min(prev + 0.05, 1))
+}
+
+const resetFrame = () => {
+  setProgress(0)
+}
+```
+
+### Progress tracking
+
+```tsx
+useEffect(() => {
+  if (isPlaying && selectedSpeed !== 'frame-by-frame') {
+    const startTime = Date.now()
+    const duration = 2000
+    
+    const animate = () => {
+      const elapsed = (Date.now() - startTime) * speeds[selectedSpeed]
+      const newProgress = Math.min((elapsed % duration) / duration, 1)
+      setProgress(newProgress)
+      
+      animationRef.current = requestAnimationFrame(animate)
+    }
+    
+    animationRef.current = requestAnimationFrame(animate)
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+    }
+  }
+}, [isPlaying, selectedSpeed])
+```
+
+## Performance optimization
+
+### Use transform for positioning
+
+```tsx
+// Good: Uses GPU-accelerated transform
+transform: `translateY(${y}px) scale(${scale})`
+
+// Avoid: Triggers layout recalculation
+top: `${y}px`
+width: `${width}px`
+```
+
+### Will-change hint
+
+```css
+.animated-element {
+  will-change: transform, opacity;
+}
+```
+
+### Responsive calculations
+
+```tsx
+const getAnimationDistance = () => {
+  if (!containerRef.current) return 50
+  const containerWidth = containerRef.current.clientWidth
+  return Math.min(containerWidth * 0.25, 100)
+}
+```
+
+## Complex animation patterns
+
+### Staggered animations
+
+Animate lists with sequential timing:
+
+```tsx
+<motion.ul
+  variants={{
+    visible: {
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }}
+  initial="hidden"
+  animate="visible"
+>
+  {items.map(item => (
+    <motion.li
+      key={item}
+      variants={{
+        hidden: { opacity: 0, x: -20 },
+        visible: { opacity: 1, x: 0 }
+      }}
+    />
+  ))}
+</motion.ul>
+```
+
+### Sequence animations
+
+Chain multiple animations together:
+
+```tsx
+<motion.div
+  animate={{
+    scale: [1, 1.2, 1],
+    rotate: [0, 90, 0],
+    borderRadius: ["0%", "50%", "0%"]
+  }}
+  transition={{
+    duration: 3,
+    times: [0, 0.5, 1],
+    ease: "easeInOut"
+  }}
+/>
+```
+
+### Dynamic keyframes
+
+Generate animation keyframes programmatically:
+
+```tsx
+const generateKeyframes = (count: number) => {
+  return Array.from({ length: count }, (_, i) => ({
+    rotate: (360 / count) * i,
+    scale: 1 + Math.sin((i / count) * Math.PI) * 0.5
+  }))
+}
+```

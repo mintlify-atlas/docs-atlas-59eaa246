@@ -1,0 +1,326 @@
+---
+title: Fade in animation
+description: Smoothly transition elements from invisible to visible using opacity animations
+---
+
+## Live demo
+
+The fade in animation is one of the most common and versatile animations in web design. It creates a smooth transition by gradually increasing an element's opacity from 0 to 1, making content appear gracefully rather than popping in suddenly.
+
+<Note>
+  Fade animations work best when combined with subtle transforms like scale or translate for added depth.
+</Note>
+
+## Complete code example
+
+<Tabs>
+  <Tab title="Framer Motion">
+    ```tsx
+    import { motion, AnimatePresence } from 'framer-motion'
+    import { useState } from 'react'
+
+    export default function FadeInDemo() {
+      const [isVisible, setIsVisible] = useState(true)
+
+      return (
+        <div>
+          <AnimatePresence mode="wait">
+            {isVisible && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="p-6 bg-blue-500 text-white rounded-lg"
+              >
+                I fade in and out smoothly
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          <button
+            onClick={() => setIsVisible(!isVisible)}
+            className="mt-4 px-4 py-2 bg-gray-900 text-white rounded"
+          >
+            Toggle Element
+          </button>
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="React Spring">
+    ```tsx
+    import { useSpring, animated } from '@react-spring/web'
+    import { useState } from 'react'
+
+    export default function FadeInDemo() {
+      const [isVisible, setIsVisible] = useState(true)
+
+      const fadeProps = useSpring({
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translateY(0px)' : 'translateY(20px)',
+        config: { tension: 280, friction: 60 }
+      })
+
+      return (
+        <div>
+          <animated.div
+            style={{
+              ...fadeProps,
+              padding: '1.5rem',
+              background: '#3B82F6',
+              color: 'white',
+              borderRadius: '0.5rem'
+            }}
+          >
+            I fade in with spring physics
+          </animated.div>
+          
+          <button
+            onClick={() => setIsVisible(!isVisible)}
+            className="mt-4 px-4 py-2 bg-gray-900 text-white rounded"
+          >
+            Toggle Element
+          </button>
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="CSS">
+    ```tsx
+    import { useState } from 'react'
+    import './fade.css'
+
+    export default function FadeInDemo() {
+      const [isVisible, setIsVisible] = useState(true)
+
+      return (
+        <div>
+          {isVisible && (
+            <div className="fade-in p-6 bg-blue-500 text-white rounded-lg">
+              I fade in with CSS
+            </div>
+          )}
+          
+          <button
+            onClick={() => setIsVisible(!isVisible)}
+            className="mt-4 px-4 py-2 bg-gray-900 text-white rounded"
+          >
+            Toggle Element
+          </button>
+        </div>
+      )
+    }
+    ```
+    
+    ```css fade.css
+    @keyframes fade-in {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fade-in 0.5s ease-out;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## How it works
+
+The fade in animation operates on two primary principles:
+
+<Steps>
+  <Step title="Opacity transition">
+    The element's opacity gradually changes from 0 (invisible) to 1 (fully visible), creating the fade effect.
+  </Step>
+  
+  <Step title="Optional transform">
+    Adding a subtle vertical translation (20px) creates depth and makes the animation feel more natural.
+  </Step>
+  
+  <Step title="Timing function">
+    Using `ease-out` or similar curves makes the animation start fast and slow down, which feels more natural.
+  </Step>
+</Steps>
+
+### Key properties
+
+<CardGroup cols={2}>
+  <Card title="opacity" icon="eye">
+    Controls transparency: 0 = invisible, 1 = fully visible
+  </Card>
+  
+  <Card title="transform" icon="arrows-up-down">
+    Adds subtle movement (optional but recommended)
+  </Card>
+  
+  <Card title="duration" icon="clock">
+    0.3-0.5s is ideal for most fade animations
+  </Card>
+  
+  <Card title="timing" icon="chart-line">
+    ease-out or similar curves feel most natural
+  </Card>
+</CardGroup>
+
+## Variations
+
+### Fade in on scroll
+
+Trigger fade animations when elements enter the viewport:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useInView } from 'framer-motion'
+import { useRef } from 'react'
+
+function ScrollFadeIn({ children }) {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true })
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 50 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 0.6 }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+```
+
+### Staggered fade in
+
+Fade in multiple elements with a delay:
+
+```tsx
+import { motion } from 'framer-motion'
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+}
+
+function StaggeredList({ items }) {
+  return (
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      {items.map((text, i) => (
+        <motion.div key={i} variants={item}>
+          {text}
+        </motion.div>
+      ))}
+    </motion.div>
+  )
+}
+```
+
+### Fade with scale
+
+Combine fade with scale for emphasis:
+
+```tsx
+<motion.div
+  initial={{ opacity: 0, scale: 0.8 }}
+  animate={{ opacity: 1, scale: 1 }}
+  exit={{ opacity: 0, scale: 0.8 }}
+  transition={{ duration: 0.4 }}
+>
+  Content
+</motion.div>
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Keep it subtle">
+    Fade animations should enhance the experience, not distract. Use durations between 0.3-0.5 seconds.
+  </Accordion>
+  
+  <Accordion title="Combine with translate">
+    Adding a small vertical movement (10-20px) makes fades feel more polished and directional.
+  </Accordion>
+  
+  <Accordion title="Respect reduced motion">
+    Always check for `prefers-reduced-motion` and provide instant transitions for accessibility.
+    
+    ```tsx
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches
+    
+    const duration = prefersReducedMotion ? 0 : 0.5
+    ```
+  </Accordion>
+  
+  <Accordion title="Use appropriate timing">
+    - `ease-out`: Best for entrances (starts fast, ends slow)
+    - `ease-in`: Best for exits (starts slow, ends fast)
+    - `ease-in-out`: Balanced, works for both
+  </Accordion>
+</AccordionGroup>
+
+## Common use cases
+
+- Modal and dialog entrances
+- Toast notifications
+- Loading content reveals
+- Image galleries
+- Page transitions
+- Tooltip appearances
+
+## Performance tips
+
+<Warning>
+  Animating opacity is GPU-accelerated and performs well. Avoid animating other properties like `color` or `background-color` alongside opacity unless necessary.
+</Warning>
+
+```tsx
+// Good - GPU accelerated
+<motion.div animate={{ opacity: 1, transform: 'translateY(0)' }} />
+
+// Avoid - Forces repaints
+<motion.div animate={{ opacity: 1, backgroundColor: '#fff' }} />
+```
+
+## Related examples
+
+<CardGroup cols={3}>
+  <Card title="Slide in" icon="arrow-right" href="/examples/slide-in">
+    Directional entrance animations
+  </Card>
+  
+  <Card title="Scale" icon="expand" href="/examples/scale">
+    Grow and shrink effects
+  </Card>
+  
+  <Card title="Scroll animation" icon="scroll" href="/examples/scroll-animation">
+    Trigger on scroll position
+  </Card>
+</CardGroup>

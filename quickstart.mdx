@@ -1,80 +1,214 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get started with Animation Playground in 5 minutes. Clone, install, and create your first interactive animation.
 ---
 
-## Get started in three steps
+# Quickstart guide
 
-Get your documentation site running locally and make your first customization.
+Get Animation Playground running locally in just a few minutes. By the end of this guide, you'll have the interactive playground running and create your first custom animation.
 
-### Step 1: Set up your local environment
+## What you'll build
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+You'll set up the Animation Playground and use the Timeline Editor to create a custom keyframe animation with multiple properties - all without writing any code.
 
-### Step 2: Deploy your changes
+## Prerequisites
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+Before you begin, make sure you have:
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+- Node.js 20 or later installed
+- A package manager (npm, yarn, pnpm, or bun)
+- Git for cloning the repository
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+<Steps>
+  <Step title="Clone the repository">
+    Clone the Animation Playground repository to your local machine:
 
-### Step 3: Go live
+    ```bash
+    git clone https://github.com/yourusername/animation-playground.git
+    cd animation-playground
+    ```
+  </Step>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+  <Step title="Install dependencies">
+    Install the required packages using your preferred package manager:
+
+    <CodeGroup>
+      ```bash npm
+      npm install
+      ```
+
+      ```bash yarn
+      yarn install
+      ```
+
+      ```bash pnpm
+      pnpm install
+      ```
+
+      ```bash bun
+      bun install
+      ```
+    </CodeGroup>
+
+    This will install the core dependencies:
+    - Next.js 15.2.2 for the framework
+    - Framer Motion 12.5.0 for React animations
+    - GSAP 3.12.7 for JavaScript animations
+    - React Spring 9.7.5 for physics-based animations
+  </Step>
+
+  <Step title="Start the development server">
+    Launch the development server:
+
+    <CodeGroup>
+      ```bash npm
+      npm run dev
+      ```
+
+      ```bash yarn
+      yarn dev
+      ```
+
+      ```bash pnpm
+      pnpm dev
+      ```
+
+      ```bash bun
+      bun dev
+      ```
+    </CodeGroup>
+
+    The server will start on `http://localhost:3000`. Open this URL in your browser.
+  </Step>
+
+  <Step title="Navigate to the Playground tab">
+    Once the application loads, you'll see several tabs at the top:
+    - Basics
+    - Advanced
+    - CSS
+    - JavaScript
+    - React
+    - Compare
+    - Performance
+    - **Playground** ← Click this one
+    - Challenges
+
+    Click on the **Playground** tab to access the Timeline Editor.
+  </Step>
+
+  <Step title="Create your first animation">
+    Now let's create a custom animation using the Timeline Editor:
+
+    1. **Add a keyframe** - Click the "Add Keyframe" button to create a second animation step
+
+    2. **Adjust properties** - Click on the new keyframe and use the sliders to modify:
+       - **X**: Move the element horizontally (-200px to 200px)
+       - **Y**: Move the element vertically (-200px to 200px)
+       - **Scale**: Change size (0.5x to 3x)
+       - **Rotate**: Rotate the element (-200° to 200°)
+       - **Opacity**: Adjust transparency (0 to 1)
+
+    3. **Add more keyframes** - Create additional steps for complex animations
+
+    4. **Reorder keyframes** - Drag and drop keyframes to change the animation sequence
+
+    5. **Preview** - Click "Play" to see your animation in action
+
+    Try this example animation:
+    - Keyframe 1: `x: 0, y: 0, scale: 1, rotate: 0, opacity: 1`
+    - Keyframe 2: `x: 100, y: -50, scale: 1.5, rotate: 180, opacity: 0.8`
+    - Keyframe 3: `x: 0, y: 0, scale: 1, rotate: 360, opacity: 1`
+  </Step>
+</Steps>
+
+## Explore other features
+
+Now that you have the playground running, explore these other interactive features:
+
+<CardGroup cols={2}>
+  <Card title="CSS animations" icon="css3">
+    Navigate to the **CSS** tab to experiment with pre-defined animations like fade-in, slide-in, rotate, pulse, and bounce. Adjust duration, timing functions, and iteration count to see how they affect the animation.
+  </Card>
+
+  <Card title="JavaScript animations" icon="js">
+    Check out the **JavaScript** tab to see `requestAnimationFrame`, GSAP, and Canvas animations in action. Click the buttons to trigger different animation techniques.
+  </Card>
+
+  <Card title="React libraries" icon="react">
+    Visit the **React** tab to explore Framer Motion, React Spring, and other React animation libraries. Try the drag-and-drop gestures and sortable lists.
+  </Card>
+
+  <Card title="Performance metrics" icon="gauge">
+    Go to the **Performance** tab to monitor FPS (frames per second) and learn optimization techniques. Test how many elements you can animate while maintaining 60 FPS.
+  </Card>
+</CardGroup>
+
+## Understanding the Playground interface
+
+The Timeline Editor provides several controls:
+
+| Control | Description |
+|---------|-------------|
+| **Add Keyframe** | Creates a new animation step with properties copied from the last keyframe |
+| **Play/Stop** | Previews your animation sequence with infinite looping |
+| **Keyframe cards** | Click to select and preview a specific animation state |
+| **Property sliders** | Adjust x, y, scale, rotate, and opacity values for each keyframe |
+| **Drag handles** | Reorder keyframes by dragging them up or down |
+
+<Tip>
+  Click on individual keyframes (without dragging) to preview that specific state without playing the full animation.
+</Tip>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
+Now that you've created your first animation, here are some suggestions for what to explore next:
 
 <CardGroup cols={2}>
+  <Card title="Core concepts" icon="book">
+    Learn about transform properties, timing functions, and animation principles in the **Basics** tab
+  </Card>
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+  <Card title="Animation challenges" icon="trophy">
+    Test your skills with interactive challenges in the **Challenges** tab
+  </Card>
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+  <Card title="Installation guide" icon="gear" href="/installation">
+    Learn about the full dependency stack and deployment options
+  </Card>
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Performance tips" icon="rocket">
+    Understand how to create smooth, efficient animations in the **Performance** tab
+  </Card>
 </CardGroup>
 
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Port 3000 is already in use">
+    If port 3000 is already in use, Next.js will automatically try the next available port (3001, 3002, etc.). Check your terminal output for the actual URL.
+
+    Alternatively, specify a custom port:
+    ```bash
+    npm run dev -- -p 3001
+    ```
+  </Accordion>
+
+  <Accordion title="Module not found errors">
+    If you see module import errors, try deleting `node_modules` and reinstalling:
+    ```bash
+    rm -rf node_modules package-lock.json
+    npm install
+    ```
+  </Accordion>
+
+  <Accordion title="Animations feel laggy">
+    Performance can vary based on your device. Try:
+    - Closing other browser tabs
+    - Reducing the number of animated elements in the Performance tab
+    - Using Chrome DevTools Performance profiler to identify bottlenecks
+  </Accordion>
+</AccordionGroup>
+
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  Found a bug or have suggestions? Reach out on Twitter at [@codingpastor](https://x.com/codingpastor) or use the Contact Support button in the bottom-left corner of the playground.
 </Note>

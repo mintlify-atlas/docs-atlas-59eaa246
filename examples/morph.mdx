@@ -1,0 +1,445 @@
+---
+title: Morph animation
+description: Transform elements between different shapes, sizes, and states with smooth morphing animations
+---
+
+## Live demo
+
+Morph animations smoothly transition elements between different visual states, creating seamless shape transformations. They're perfect for toggle buttons, icon transitions, and dynamic UI elements that change form.
+
+<Note>
+  Morphing works best when transitioning between shapes with similar complexity and point counts.
+</Note>
+
+## Complete code example
+
+<Tabs>
+  <Tab title="Framer Motion">
+    ```tsx
+    import { motion } from 'framer-motion'
+    import { useState } from 'react'
+
+    export default function MorphDemo() {
+      const [isCircle, setIsCircle] = useState(false)
+
+      return (
+        <div className="space-y-6">
+          {/* Shape morph */}
+          <motion.div
+            animate={{
+              borderRadius: isCircle ? '50%' : '0%',
+              rotate: isCircle ? 180 : 0
+            }}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
+            className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-500 mx-auto cursor-pointer"
+            onClick={() => setIsCircle(!isCircle)}
+          />
+
+          {/* Size morph */}
+          <motion.div
+            layout
+            animate={{
+              width: isCircle ? 200 : 128,
+              height: isCircle ? 80 : 128
+            }}
+            transition={{ duration: 0.5 }}
+            className="bg-green-500 rounded-lg mx-auto cursor-pointer"
+            onClick={() => setIsCircle(!isCircle)}
+          />
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="React Spring">
+    ```tsx
+    import { useSpring, animated } from '@react-spring/web'
+    import { useState } from 'react'
+
+    export default function MorphDemo() {
+      const [toggle, setToggle] = useState(false)
+
+      const morphProps = useSpring({
+        borderRadius: toggle ? '50%' : '0%',
+        transform: toggle ? 'rotate(180deg)' : 'rotate(0deg)',
+        background: toggle
+          ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+          : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        config: { tension: 280, friction: 60 }
+      })
+
+      return (
+        <animated.div
+          style={{
+            ...morphProps,
+            width: '8rem',
+            height: '8rem',
+            margin: '0 auto',
+            cursor: 'pointer'
+          }}
+          onClick={() => setToggle(!toggle)}
+        />
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="CSS">
+    ```tsx
+    import { useState } from 'react'
+    import './morph.css'
+
+    export default function MorphDemo() {
+      const [key, setKey] = useState(0)
+
+      return (
+        <div>
+          <button
+            onClick={() => setKey(k => k + 1)}
+            className="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Replay Animation
+          </button>
+
+          <div
+            key={key}
+            className="morph-shape w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-500 mx-auto"
+          />
+        </div>
+      )
+    }
+    ```
+    
+    ```css morph.css
+    @keyframes morph {
+      0% {
+        border-radius: 0%;
+        transform: rotate(0deg);
+      }
+      50% {
+        border-radius: 50%;
+        transform: rotate(180deg);
+      }
+      100% {
+        border-radius: 0%;
+        transform: rotate(360deg);
+      }
+    }
+
+    .morph-shape {
+      animation: morph 3s ease-in-out infinite;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## How it works
+
+Morph animations transition between visual states:
+
+<Steps>
+  <Step title="Define states">
+    Establish the initial and target states with different properties (shape, size, color).
+  </Step>
+  
+  <Step title="Interpolate properties">
+    Smoothly transition between values using easing functions.
+  </Step>
+  
+  <Step title="Sync multiple properties">
+    Coordinate changes across border-radius, dimensions, colors, and transforms.
+  </Step>
+</Steps>
+
+### Morphable properties
+
+<CardGroup cols={2}>
+  <Card title="Border radius" icon="circle">
+    Transition from sharp corners to rounded or circular shapes
+  </Card>
+  
+  <Card title="Dimensions" icon="expand">
+    Change width and height to morph between sizes
+  </Card>
+  
+  <Card title="Colors" icon="palette">
+    Smoothly blend between different color values
+  </Card>
+  
+  <Card title="Transforms" icon="arrows-rotate">
+    Combine with rotation, scale, and position changes
+  </Card>
+</CardGroup>
+
+## Variations
+
+### Menu icon morph
+
+Hamburger to X transition:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+function MenuIcon() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <button
+      onClick={() => setIsOpen(!isOpen)}
+      className="w-12 h-12 flex flex-col justify-center items-center gap-1.5"
+    >
+      <motion.div
+        animate={{
+          rotate: isOpen ? 45 : 0,
+          y: isOpen ? 8 : 0
+        }}
+        className="w-8 h-0.5 bg-gray-900"
+      />
+      <motion.div
+        animate={{
+          opacity: isOpen ? 0 : 1
+        }}
+        className="w-8 h-0.5 bg-gray-900"
+      />
+      <motion.div
+        animate={{
+          rotate: isOpen ? -45 : 0,
+          y: isOpen ? -8 : 0
+        }}
+        className="w-8 h-0.5 bg-gray-900"
+      />
+    </button>
+  )
+}
+```
+
+### Play to pause button
+
+Icon state morphing:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+function PlayPauseButton() {
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  return (
+    <motion.button
+      onClick={() => setIsPlaying(!isPlaying)}
+      className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24">
+        <motion.path
+          d={isPlaying
+            ? 'M6 4h4v16H6V4zm8 0h4v16h-4V4z'
+            : 'M8 5v14l11-7z'
+          }
+          fill="white"
+          transition={{ duration: 0.3 }}
+        />
+      </svg>
+    </motion.button>
+  )
+}
+```
+
+### Card expand morph
+
+Expanding card with layout animation:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+function ExpandingCard() {
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  return (
+    <motion.div
+      layout
+      onClick={() => setIsExpanded(!isExpanded)}
+      className="bg-white rounded-lg shadow-lg p-6 cursor-pointer"
+      style={{
+        width: isExpanded ? '100%' : '300px'
+      }}
+    >
+      <motion.h2 layout className="text-xl font-bold mb-2">
+        Expandable Card
+      </motion.h2>
+      {isExpanded && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <p>Additional content appears when expanded.</p>
+        </motion.div>
+      )}
+    </motion.div>
+  )
+}
+```
+
+### Color morph
+
+Smooth color transitions:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+function ColorMorph() {
+  const [colorIndex, setColorIndex] = useState(0)
+  const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#10B981']
+
+  return (
+    <motion.div
+      animate={{
+        backgroundColor: colors[colorIndex]
+      }}
+      transition={{ duration: 0.5 }}
+      onClick={() => setColorIndex((i) => (i + 1) % colors.length)}
+      className="w-32 h-32 rounded-lg cursor-pointer"
+    />
+  )
+}
+```
+
+## Example from the playground
+
+From the CSSAnimations component:
+
+```tsx
+const presets = {
+  morph: `
+.animated-element {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(45deg, #00C9A7, #845EC2);
+  animation: morph 3s infinite;
+}
+
+@keyframes morph {
+  0% { border-radius: 0%; }
+  50% { border-radius: 50%; }
+  100% { border-radius: 0%; }
+}`,
+}
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Use smooth easing">
+    Choose easing curves that feel natural for the morphing effect.
+    
+    ```tsx
+    // Good - smooth morph
+    transition={{ duration: 0.6, ease: 'easeInOut' }}
+    
+    // Avoid - feels mechanical
+    transition={{ duration: 0.6, ease: 'linear' }}
+    ```
+  </Accordion>
+  
+  <Accordion title="Coordinate multiple properties">
+    Morph multiple properties simultaneously for cohesive transformations.
+    
+    ```tsx
+    animate={{
+      borderRadius: isCircle ? '50%' : '0%',
+      scale: isCircle ? 1.2 : 1,
+      rotate: isCircle ? 180 : 0
+    }}
+    ```
+  </Accordion>
+  
+  <Accordion title="Use layout animations">
+    Framer Motion's `layout` prop handles complex morphs automatically.
+    
+    ```tsx
+    <motion.div layout>
+      {/* Content changes trigger smooth morphing */}
+    </motion.div>
+    ```
+  </Accordion>
+  
+  <Accordion title="Maintain aspect ratio awareness">
+    When morphing dimensions, consider how content will reflow.
+  </Accordion>
+</AccordionGroup>
+
+## Common use cases
+
+- Toggle buttons and switches
+- Icon state transitions (play/pause, menu/close)
+- Loading states
+- Expanding cards and panels
+- Avatar shapes
+- Button hover states
+- Theme switchers
+- Progress indicators
+
+## Performance tips
+
+<Warning>
+  Morphing border-radius and colors is GPU-accelerated. Avoid morphing box-shadow or filter properties excessively as they can be expensive.
+</Warning>
+
+```tsx
+// Good - GPU accelerated
+<motion.div animate={{ borderRadius: '50%', backgroundColor: '#000' }} />
+
+// Expensive - use sparingly
+<motion.div animate={{ boxShadow: '0 0 50px rgba(0,0,0,0.5)' }} />
+```
+
+## SVG morphing
+
+For complex shape morphing, use SVG path interpolation:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+function SVGMorph() {
+  const [isHeart, setIsHeart] = useState(false)
+
+  const circlePath = 'M12,2 A10,10 0 1,0 12,22 A10,10 0 1,0 12,2'
+  const heartPath = 'M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z'
+
+  return (
+    <svg width="100" height="100" viewBox="0 0 24 24">
+      <motion.path
+        d={isHeart ? heartPath : circlePath}
+        fill="#EC4899"
+        onClick={() => setIsHeart(!isHeart)}
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
+      />
+    </svg>
+  )
+}
+```
+
+<Note>
+  SVG path morphing works best when paths have the same number of points. Use tools like Flubber for complex path interpolation.
+</Note>
+
+## Related examples
+
+<CardGroup cols={3}>
+  <Card title="Scale" icon="expand" href="/examples/scale">
+    Size transformation animations
+  </Card>
+  
+  <Card title="Rotate" icon="rotate" href="/examples/rotate">
+    Rotation animations
+  </Card>
+  
+  <Card title="Fade in" icon="eye" href="/examples/fade-in">
+    Opacity transitions
+  </Card>
+</CardGroup>

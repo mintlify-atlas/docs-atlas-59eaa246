@@ -1,0 +1,502 @@
+---
+title: Performance metrics
+description: Monitor frame rates and optimize animation performance
+---
+
+The Performance Metrics tool helps you understand how animations impact your application's performance. Monitor frames per second (FPS), compare different animation techniques, and learn optimization strategies for smooth, performant animations.
+
+## Overview
+
+Smooth animations run at 60 FPS (frames per second), meaning the browser redraws the screen every 16.67 milliseconds. When animations drop below this threshold, they appear janky or stuttery. This tool helps you:
+
+- Track real-time FPS during animations
+- Compare performance of different animation approaches
+- Identify performance bottlenecks
+- Learn optimization techniques
+
+<Info>
+Most modern displays refresh at 60Hz, so 60 FPS is the target for smooth animations. Some displays support higher refresh rates (120Hz, 144Hz), but 60 FPS is the baseline.
+</Info>
+
+## FPS tracking features
+
+The Performance Metrics tool uses `requestAnimationFrame` to measure frame rates accurately.
+
+### Real-time monitoring
+
+Click "Start Monitoring" to begin tracking FPS. The tool measures the time between frames:
+
+```tsx
+const measureFPS = (timestamp: number) => {
+  if (lastTimeRef.current) {
+    const delta = timestamp - lastTimeRef.current
+    const fps = Math.round(1000 / delta)
+
+    setMetrics(prev => [
+      ...prev.slice(-50),  // Keep last 50 measurements
+      { fps, timestamp }
+    ])
+  }
+
+  lastTimeRef.current = timestamp
+  frameRef.current = requestAnimationFrame(measureFPS)
+}
+```
+
+The calculation works by:
+
+1. Recording the timestamp of each frame
+2. Calculating the time difference (delta) between frames
+3. Converting to FPS: `1000ms / delta = frames per second`
+4. Storing the last 50 measurements for visualization
+
+### FPS visualization
+
+The tool displays a live graph showing FPS over time:
+
+```tsx
+<div className="h-32 relative border border-gray-200 rounded">
+  {metrics.map((metric, i) => (
+    <div
+      key={metric.timestamp}
+      className="absolute bottom-0 bg-blue-500 w-1"
+      style={{
+        height: `${(metric.fps / 60) * 100}%`,
+        left: `${(i / 50) * 100}%`
+      }}
+    />
+  ))}
+</div>
+```
+
+Each vertical bar represents one frame:
+
+- **Full height**: 60 FPS (optimal)
+- **Half height**: 30 FPS (noticeable jank)
+- **Short bars**: Significant performance issues
+
+### Average FPS calculation
+
+The tool shows the average FPS across all measurements:
+
+```tsx
+const averageFPS = metrics.length > 0
+  ? Math.round(metrics.reduce((sum, m) => sum + m.fps, 0) / metrics.length)
+  : 0
+```
+
+This gives you a single number to track overall performance.
+
+## How to interpret metrics
+
+Understanding FPS numbers helps you diagnose performance issues.
+
+### FPS ranges and what they mean
+
+<CardGroup cols={3}>
+  <Card title="60 FPS" icon="circle-check" color="#10b981">
+    **Excellent** - Smooth, buttery animations with no visible jank
+  </Card>
+  <Card title="45-59 FPS" icon="circle-exclamation" color="#f59e0b">
+    **Good** - Mostly smooth with occasional minor stutters
+  </Card>
+  <Card title="30-44 FPS" icon="triangle-exclamation" color="#ef4444">
+    **Noticeable jank** - Visible stuttering, needs optimization
+  </Card>
+  <Card title="Below 30 FPS" icon="circle-xmark" color="#dc2626">
+    **Poor** - Significant performance issues, unusable
+  </Card>
+</CardGroup>
+
+### Reading the FPS graph
+
+Look for these patterns:
+
+**Stable horizontal line at top**: Consistent 60 FPS - perfect performance
+
+**Slight variations**: Normal - minor fluctuations are expected
+
+**Sudden drops**: Performance spikes - indicates expensive operations
+
+**Consistently low**: Systemic issues - animation approach needs rethinking
+
+### Common causes of low FPS
+
+<AccordionGroup>
+  <Accordion title="Animating expensive properties">
+    Properties like `width`, `height`, `top`, `left` trigger layout recalculation. Use `transform` and `opacity` instead.
+    
+    ```css
+    /* Bad - triggers layout */
+    .box { left: 0; }
+    .box.animate { left: 100px; }
+    
+    /* Good - uses transform */
+    .box { transform: translateX(0); }
+    .box.animate { transform: translateX(100px); }
+    ```
+  </Accordion>
+  
+  <Accordion title="Too many simultaneous animations">
+    Animating hundreds of elements simultaneously overwhelms the browser. Stagger animations or reduce quantity.
+    
+    ```tsx
+    // Stagger animations to reduce simultaneous load
+    transition={{
+      duration: 2,
+      repeat: Infinity,
+      delay: i * 0.1  // Each element starts 0.1s after previous
+    }}
+    ```
+  </Accordion>
+  
+  <Accordion title="Forced synchronous layouts">
+    Reading layout properties (offsetWidth, scrollTop) during animation causes reflows. Read values before animating.
+    
+    ```tsx
+    // Bad - reads layout during animation
+    requestAnimationFrame(() => {
+      element.style.transform = `translateX(${element.offsetWidth}px)`
+    })
+    
+    // Good - reads layout before animation
+    const width = element.offsetWidth
+    requestAnimationFrame(() => {
+      element.style.transform = `translateX(${width}px)`
+    })
+    ```
+  </Accordion>
+  
+  <Accordion title="No hardware acceleration">
+    Modern browsers can offload animations to the GPU. Use transform and opacity, or explicitly promote elements with will-change.
+    
+    ```css
+    .box {
+      will-change: transform, opacity;
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Performance comparison test
+
+The tool includes an interactive comparison showing the performance impact of different animation approaches.
+
+### Transform vs layout properties
+
+Compare animating with `transform` versus `top`/`left`:
+
+```tsx
+<motion.div
+  animate={useTransform ? {
+    x: [0, 100, 0],      // Uses transform: translateX()
+    y: [0, 100, 0]       // Uses transform: translateY()
+  } : {
+    left: ['0px', '100px', '0px'],    // Triggers layout
+    top: ['0px', '100px', '0px']      // Triggers layout
+  }}
+  transition={{
+    duration: 2,
+    repeat: Infinity
+  }}
+/>
+```
+
+<Warning>
+Animating `left` and `top` triggers layout recalculation for every frame, significantly impacting performance. Always prefer `transform` for position changes.
+</Warning>
+
+### Testing with different quantities
+
+Adjust the slider to see how animation count affects performance:
+
+```tsx
+<input
+  type="range"
+  min="1"
+  max="100"
+  value={animationCount}
+  onChange={(e) => setAnimationCount(parseInt(e.target.value))}
+/>
+
+{Array.from({ length: animationCount }).map((_, i) => (
+  <motion.div
+    key={i}
+    animate={{
+      x: [0, 100, 0],
+      y: [0, 100, 0]
+    }}
+    transition={{
+      duration: 2,
+      repeat: Infinity,
+      delay: i * 0.1
+    }}
+  />
+))}
+```
+
+Observe how FPS changes as you increase the number of animated elements:
+
+- **1-10 elements**: Should maintain 60 FPS easily
+- **10-50 elements**: May see minor FPS drops
+- **50-100 elements**: Likely to see significant performance impact
+
+### Why transform performs better
+
+The browser rendering pipeline has three main stages:
+
+<Steps>
+  <Step title="Layout (Reflow)">
+    Calculate the size and position of elements. Very expensive.
+  </Step>
+  
+  <Step title="Paint">
+    Fill in pixels (colors, images, text). Moderately expensive.
+  </Step>
+  
+  <Step title="Composite">
+    Combine layers together. Inexpensive, GPU-accelerated.
+  </Step>
+</Steps>
+
+Different CSS properties trigger different stages:
+
+| Property | Triggers | Performance |
+|----------|----------|-------------|
+| `width`, `height`, `left`, `top` | Layout → Paint → Composite | Slowest |
+| `color`, `background-color` | Paint → Composite | Moderate |
+| `transform`, `opacity` | Composite only | Fastest |
+
+When you use `transform`, the browser can skip layout and paint entirely, offloading work to the GPU.
+
+## Optimization tips based on metrics
+
+Use these strategies when metrics reveal performance issues:
+
+### Use will-change sparingly
+
+The `will-change` CSS property tells the browser to optimize for upcoming changes:
+
+```css
+.box {
+  will-change: transform, opacity;
+}
+```
+
+<Warning>
+Don't overuse `will-change`. It consumes memory by creating new layers. Only use it on elements you're actively animating.
+</Warning>
+
+Better approach - add `will-change` dynamically:
+
+```tsx
+const [isAnimating, setIsAnimating] = useState(false)
+
+<motion.div
+  style={{ willChange: isAnimating ? 'transform, opacity' : 'auto' }}
+  onAnimationStart={() => setIsAnimating(true)}
+  onAnimationComplete={() => setIsAnimating(false)}
+/>
+```
+
+### Promote to new compositor layer
+
+For elements that animate frequently, create a compositor layer:
+
+```css
+.frequently-animated {
+  transform: translateZ(0);  /* Creates new layer */
+  /* or */
+  transform: translate3d(0, 0, 0);
+}
+```
+
+This isolates the element's rendering from the rest of the page.
+
+### Debounce scroll handlers
+
+Scroll-based animations can fire hundreds of times per second:
+
+```tsx
+const handleScroll = useCallback(
+  debounce(() => {
+    // Expensive animation logic
+  }, 16),  // ~60fps
+  []
+)
+
+useEffect(() => {
+  window.addEventListener('scroll', handleScroll)
+  return () => window.removeEventListener('scroll', handleScroll)
+}, [handleScroll])
+```
+
+Or use `requestAnimationFrame`:
+
+```tsx
+const handleScroll = () => {
+  if (rafRef.current) return  // Already scheduled
+  
+  rafRef.current = requestAnimationFrame(() => {
+    // Animation logic
+    rafRef.current = null
+  })
+}
+```
+
+### Reduce paint area
+
+Minimize the area that needs repainting:
+
+```tsx
+// Bad - animates large container
+<div className="large-container">
+  <motion.div animate={{ opacity: [0, 1] }}>
+    {/* Content */}
+  </motion.div>
+</div>
+
+// Good - animates only necessary element
+<div className="large-container">
+  <motion.div 
+    className="small-element"
+    animate={{ opacity: [0, 1] }}
+  >
+    {/* Content */}
+  </motion.div>
+</div>
+```
+
+### Use transform instead of multiple properties
+
+Combine transforms into a single property:
+
+```css
+/* Bad - triggers multiple calculations */
+.box {
+  transform: translateX(100px);
+  transform: scale(1.2);
+  transform: rotate(45deg);
+}
+
+/* Good - single transform */
+.box {
+  transform: translateX(100px) scale(1.2) rotate(45deg);
+}
+```
+
+### Avoid animating box-shadow
+
+`box-shadow` is expensive to animate. Use alternatives:
+
+```tsx
+// Instead of animating box-shadow, use opacity on a pseudo-element
+.card {
+  position: relative;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover::after {
+  opacity: 1;
+}
+```
+
+## Monitoring workflow
+
+<Steps>
+  <Step title="Start with baseline measurement">
+    Click "Start Monitoring" with no animations running to see baseline performance.
+  </Step>
+  
+  <Step title="Enable animations">
+    Add animations and observe FPS changes. Significant drops indicate performance issues.
+  </Step>
+  
+  <Step title="Adjust technique">
+    Toggle between transform and layout properties to see the performance difference.
+  </Step>
+  
+  <Step title="Test different quantities">
+    Increase the number of animated elements until you see FPS drops. This reveals your performance budget.
+  </Step>
+  
+  <Step title="Apply optimizations">
+    Use the tips above to improve performance, then re-measure to confirm improvements.
+  </Step>
+</Steps>
+
+## Browser DevTools integration
+
+For deeper performance analysis, use browser developer tools alongside this tool:
+
+### Chrome DevTools Performance panel
+
+1. Open DevTools (F12)
+2. Go to Performance tab
+3. Click Record
+4. Interact with animations
+5. Stop recording
+
+Look for:
+- **Long frames** (yellow/red bars) - frames taking >16ms
+- **Layout/Reflow** events - expensive operations
+- **Paint** events - areas being redrawn
+
+### Firefox Performance tool
+
+1. Open DevTools (F12)
+2. Go to Performance tab
+3. Click Start Recording Performance
+4. Interact with animations
+5. Stop recording
+
+Check:
+- **Frame rate graph** - should be consistently high
+- **Waterfall** - shows what's happening in each frame
+- **Call tree** - identifies expensive functions
+
+<Tip>
+Use the Performance Metrics tool for quick checks, and browser DevTools for detailed investigation when you find performance issues.
+</Tip>
+
+## Best practices summary
+
+<CardGroup cols={2}>
+  <Card title="Animate transform and opacity" icon="check">
+    These properties are GPU-accelerated and skip layout/paint stages
+  </Card>
+  <Card title="Promote heavy animations" icon="layer-group">
+    Use will-change or transform3d for frequently animated elements
+  </Card>
+  <Card title="Debounce scroll handlers" icon="clock">
+    Limit scroll-based animations to maintain 60 FPS
+  </Card>
+  <Card title="Reduce animated elements" icon="minimize">
+    Animate only what's necessary - fewer elements = better performance
+  </Card>
+  <Card title="Avoid layout thrashing" icon="ban">
+    Batch DOM reads and writes, don't interleave them
+  </Card>
+  <Card title="Test on low-end devices" icon="mobile">
+    Performance on your development machine doesn't reflect user experience
+  </Card>
+</CardGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Animation comparison" icon="code-compare" href="/tools/animation-comparison">
+    Compare different animation techniques
+  </Card>
+  <Card title="Animation challenges" icon="trophy" href="/tools/challenges">
+    Practice optimization with guided challenges
+  </Card>
+</CardGroup>

@@ -1,0 +1,369 @@
+---
+title: Slide in animation
+description: Create directional entrance animations by sliding elements from off-screen positions
+---
+
+## Live demo
+
+Slide animations move elements into view from a specific direction, creating a sense of spatial awareness and directionality. They're perfect for navigation menus, sidebars, and sequential content reveals.
+
+<Note>
+  Combine slide animations with fade effects for smoother, more polished transitions.
+</Note>
+
+## Complete code example
+
+<Tabs>
+  <Tab title="Framer Motion">
+    ```tsx
+    import { motion } from 'framer-motion'
+    import { useState } from 'react'
+
+    export default function SlideInDemo() {
+      const [direction, setDirection] = useState<'left' | 'right' | 'top' | 'bottom'>('left')
+
+      const variants = {
+        left: { x: -100, opacity: 0 },
+        right: { x: 100, opacity: 0 },
+        top: { y: -100, opacity: 0 },
+        bottom: { y: 100, opacity: 0 },
+      }
+
+      return (
+        <div>
+          <div className="flex gap-2 mb-4">
+            {(['left', 'right', 'top', 'bottom'] as const).map((dir) => (
+              <button
+                key={dir}
+                onClick={() => setDirection(dir)}
+                className="px-3 py-1 bg-blue-500 text-white rounded"
+              >
+                {dir}
+              </button>
+            ))}
+          </div>
+
+          <motion.div
+            key={direction}
+            initial={variants[direction]}
+            animate={{ x: 0, y: 0, opacity: 1 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="p-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg"
+          >
+            Sliding from {direction}
+          </motion.div>
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="React Spring">
+    ```tsx
+    import { useSpring, animated } from '@react-spring/web'
+    import { useState } from 'react'
+
+    export default function SlideInDemo() {
+      const [direction, setDirection] = useState('left')
+
+      const slideProps = useSpring({
+        from: {
+          transform: direction === 'left' ? 'translateX(-100px)' : 'translateX(100px)',
+          opacity: 0
+        },
+        to: {
+          transform: 'translateX(0px)',
+          opacity: 1
+        },
+        config: { tension: 300, friction: 25 }
+      })
+
+      return (
+        <div>
+          <div className="flex gap-2 mb-4">
+            <button onClick={() => setDirection('left')}>From Left</button>
+            <button onClick={() => setDirection('right')}>From Right</button>
+          </div>
+
+          <animated.div
+            style={{
+              ...slideProps,
+              padding: '1.5rem',
+              background: 'linear-gradient(to right, #8B5CF6, #EC4899)',
+              color: 'white',
+              borderRadius: '0.5rem'
+            }}
+          >
+            Sliding with spring physics
+          </animated.div>
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="CSS">
+    ```tsx
+    import { useState } from 'react'
+    import './slide.css'
+
+    export default function SlideInDemo() {
+      const [key, setKey] = useState(0)
+
+      return (
+        <div>
+          <button
+            onClick={() => setKey(k => k + 1)}
+            className="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Replay Animation
+          </button>
+
+          <div
+            key={key}
+            className="slide-in-left p-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg"
+          >
+            Sliding with CSS
+          </div>
+        </div>
+      )
+    }
+    ```
+    
+    ```css slide.css
+    @keyframes slide-in-left {
+      0% {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slide-in-right {
+      0% {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .slide-in-left {
+      animation: slide-in-left 0.5s ease-out;
+    }
+
+    .slide-in-right {
+      animation: slide-in-right 0.5s ease-out;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## How it works
+
+Slide animations use transform properties to move elements:
+
+<Steps>
+  <Step title="Initial position">
+    Place the element off-screen or offset from its final position using `translateX` or `translateY`.
+  </Step>
+  
+  <Step title="Animate to final">
+    Transition the transform to `translate(0)` to slide the element into its natural position.
+  </Step>
+  
+  <Step title="Add opacity">
+    Combine with opacity changes (0 to 1) for a smoother, more polished effect.
+  </Step>
+</Steps>
+
+### Direction reference
+
+<CardGroup cols={2}>
+  <Card title="From left" icon="arrow-right">
+    `translateX(-100%)` or `x: -100`
+  </Card>
+  
+  <Card title="From right" icon="arrow-left">
+    `translateX(100%)` or `x: 100`
+  </Card>
+  
+  <Card title="From top" icon="arrow-down">
+    `translateY(-100%)` or `y: -100`
+  </Card>
+  
+  <Card title="From bottom" icon="arrow-up">
+    `translateY(100%)` or `y: 100`
+  </Card>
+</CardGroup>
+
+## Variations
+
+### Slide in sidebar
+
+Common pattern for navigation menus:
+
+```tsx
+import { motion, AnimatePresence } from 'framer-motion'
+
+function Sidebar({ isOpen, onClose }) {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/50 z-40"
+          />
+          
+          {/* Sidebar */}
+          <motion.div
+            initial={{ x: -300 }}
+            animate={{ x: 0 }}
+            exit={{ x: -300 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="fixed left-0 top-0 bottom-0 w-64 bg-white shadow-xl z-50"
+          >
+            Sidebar content
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
+```
+
+### Sequential slide in
+
+Slide in items one after another:
+
+```tsx
+import { motion } from 'framer-motion'
+
+const container = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const item = {
+  hidden: { x: -50, opacity: 0 },
+  show: { x: 0, opacity: 1 }
+}
+
+function SequentialSlide({ items }) {
+  return (
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      {items.map((text, i) => (
+        <motion.div
+          key={i}
+          variants={item}
+          className="p-4 mb-2 bg-gray-100 rounded"
+        >
+          {text}
+        </motion.div>
+      ))}
+    </motion.div>
+  )
+}
+```
+
+### Slide and rotate
+
+Add rotation for dynamic effect:
+
+```tsx
+<motion.div
+  initial={{ x: -100, opacity: 0, rotate: -10 }}
+  animate={{ x: 0, opacity: 1, rotate: 0 }}
+  transition={{ type: 'spring', stiffness: 200 }}
+>
+  Content
+</motion.div>
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Match direction to flow">
+    Slide direction should match the user's mental model:
+    - Navigation from left for LTR languages
+    - Modals from bottom on mobile
+    - Notifications from top or corner
+  </Accordion>
+  
+  <Accordion title="Use spring physics">
+    Spring-based transitions feel more natural than linear ones for slide animations.
+    
+    ```tsx
+    // Good
+    transition={{ type: 'spring', damping: 25 }}
+    
+    // Less natural
+    transition={{ duration: 0.3, ease: 'linear' }}
+    ```
+  </Accordion>
+  
+  <Accordion title="Add backdrop for overlays">
+    When sliding in panels or sidebars, include a semi-transparent backdrop.
+  </Accordion>
+  
+  <Accordion title="Consider mobile gestures">
+    On mobile, allow users to swipe to dismiss slide-in panels.
+  </Accordion>
+</AccordionGroup>
+
+## Common use cases
+
+- Navigation drawers and sidebars
+- Mobile menu overlays
+- Notification panels
+- Image carousels
+- Wizard steps
+- Chat messages
+
+## Performance tips
+
+<Warning>
+  Always use `transform: translate()` instead of `left`/`right`/`top`/`bottom` for animations. Transform is GPU-accelerated and won't trigger layout recalculations.
+</Warning>
+
+```tsx
+// Good - GPU accelerated
+<motion.div animate={{ x: 0 }} />
+
+// Bad - Causes layout thrashing
+<motion.div animate={{ left: 0 }} />
+```
+
+## Related examples
+
+<CardGroup cols={3}>
+  <Card title="Fade in" icon="eye" href="/examples/fade-in">
+    Opacity-based transitions
+  </Card>
+  
+  <Card title="Drag gesture" icon="hand-pointer" href="/examples/drag-gesture">
+    Swipeable interactions
+  </Card>
+  
+  <Card title="Morph" icon="wand-magic-sparkles" href="/examples/morph">
+    Shape transformations
+  </Card>
+</CardGroup>

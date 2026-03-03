@@ -1,0 +1,152 @@
+---
+title: PerformanceMetrics component
+description: Real-time FPS monitoring and performance tracking for animations
+---
+
+The `PerformanceMetrics` component provides real-time performance monitoring to help developers optimize their animations for smooth 60 FPS playback.
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="FPS tracking" icon="tachometer-alt">
+    Real-time frames per second measurement
+  </Card>
+  <Card title="Statistics" icon="chart-bar">
+    Current, average, min, and max FPS values
+  </Card>
+  <Card title="Visual indicators" icon="traffic-light">
+    Color-coded performance status (green/yellow/red)
+  </Card>
+  <Card title="History tracking" icon="clock-rotate-left">
+    Maintains rolling average over last 60 samples
+  </Card>
+</CardGroup>
+
+## Implementation
+
+The component uses `requestAnimationFrame` to measure rendering performance:
+
+```tsx
+function FPSStats() {
+  const [fps, setFps] = useState(0)
+  const [avgFps, setAvgFps] = useState(0)
+  const [minFps, setMinFps] = useState(Infinity)
+  const [maxFps, setMaxFps] = useState(0)
+  const frameRef = useRef<number>(0)
+  const lastTimeRef = useRef<number>(performance.now())
+  const fpsHistoryRef = useRef<number[]>([])
+
+  useEffect(() => {
+    const measureFPS = (timestamp: number) => {
+      frameRef.current++
+      const elapsed = timestamp - lastTimeRef.current
+
+      if (elapsed >= 1000) {
+        const currentFps = Math.round((frameRef.current * 1000) / elapsed)
+        setFps(currentFps)
+
+        fpsHistoryRef.current.push(currentFps)
+        if (fpsHistoryRef.current.length > 60) {
+          fpsHistoryRef.current.shift()
+        }
+
+        const avg = Math.round(
+          fpsHistoryRef.current.reduce((a, b) => a + b, 0) /
+            fpsHistoryRef.current.length
+        )
+        setAvgFps(avg)
+        setMinFps(Math.min(currentFps, minFps))
+        setMaxFps(Math.max(currentFps, maxFps))
+
+        frameRef.current = 0
+        lastTimeRef.current = timestamp
+      }
+
+      requestAnimationFrame(measureFPS)
+    }
+
+    requestAnimationFrame(measureFPS)
+  }, [minFps, maxFps])
+
+  // ... render logic
+}
+```
+
+## Performance indicators
+
+The component uses color-coded indicators:
+
+- **Green (55+ FPS)** - Excellent performance, smooth animations
+- **Yellow (50-54 FPS)** - Minor stutters, generally acceptable
+- **Red (Below 50 FPS)** - Noticeable lag, optimization needed
+
+## FPS calculation
+
+```tsx
+const currentFps = Math.round((frameRef.current * 1000) / elapsed)
+```
+
+This formula calculates FPS by:
+1. Counting frames rendered in the last second
+2. Dividing by the actual elapsed time
+3. Multiplying by 1000 to get frames per second
+
+## Metrics displayed
+
+<Tabs>
+  <Tab title="Current FPS">
+    Shows the FPS from the most recent measurement interval. Updates every second.
+  </Tab>
+  <Tab title="Average FPS">
+    Rolling average of the last 60 FPS measurements. Smooths out temporary spikes or drops.
+  </Tab>
+  <Tab title="Min FPS">
+    Lowest FPS recorded since monitoring started. Helps identify worst-case performance.
+  </Tab>
+  <Tab title="Max FPS">
+    Highest FPS recorded. Usually caps at 60 FPS on standard displays (or higher on high-refresh screens).
+  </Tab>
+</Tabs>
+
+## Using the component
+
+```tsx
+import PerformanceMetrics from './components/PerformanceMetrics'
+
+<section>
+  <h2>Performance Monitoring</h2>
+  <PerformanceMetrics />
+</section>
+```
+
+## Optimization tips
+
+If you see low FPS:
+
+<Steps>
+  <Step title="Use transform and opacity">
+    These properties are GPU-accelerated and don't trigger layout or paint.
+  </Step>
+  
+  <Step title="Avoid layout properties">
+    Properties like `width`, `height`, `top`, `left` force expensive layout recalculations.
+  </Step>
+  
+  <Step title="Add will-change">
+    Tell the browser which properties will animate: `will-change: transform, opacity`
+  </Step>
+  
+  <Step title="Reduce animation count">
+    Too many simultaneous animations can overwhelm the GPU.
+  </Step>
+</Steps>
+
+<Warning>
+  Don't leave `will-change` on elements permanently - it consumes memory. Add it just before animating and remove it after.
+</Warning>
+
+## Related
+
+- [Performance concepts](/concepts/performance)
+- [Optimization guide](/reference/optimization)
+- [Browser DevTools](/reference/browser-support)

@@ -1,0 +1,428 @@
+---
+title: Scroll animation
+description: Create animations that respond to scroll position for dynamic, engaging user experiences
+---
+
+## Live demo
+
+Scroll animations trigger or respond to the user's scroll position, creating dynamic effects that enhance storytelling and user engagement. They range from simple fade-in-on-scroll to complex parallax and scroll-driven narratives.
+
+<Note>
+  Scroll animations should enhance content, not obstruct it. Always ensure content remains accessible even if animations fail.
+</Note>
+
+## Complete code example
+
+<Tabs>
+  <Tab title="Scroll Progress Bar">
+    ```tsx
+    import { motion, useScroll, useSpring } from 'framer-motion'
+
+    export default function ScrollProgress() {
+      const { scrollYProgress } = useScroll()
+      const scaleX = useSpring(scrollYProgress, {
+        stiffness: 100,
+        damping: 30,
+        restDelta: 0.001
+      })
+
+      return (
+        <>
+          <motion.div
+            style={{ scaleX }}
+            className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left z-50"
+          />
+          
+          <div className="h-[200vh] p-8">
+            <h1 className="text-4xl font-bold mb-4">Scroll down</h1>
+            <p>The blue bar at the top tracks scroll progress.</p>
+          </div>
+        </>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Fade In on Scroll">
+    ```tsx
+    import { motion, useInView } from 'framer-motion'
+    import { useRef } from 'react'
+
+    function FadeInSection({ children }) {
+      const ref = useRef(null)
+      const isInView = useInView(ref, { once: true, margin: '-100px' })
+
+      return (
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          transition={{ duration: 0.6 }}
+        >
+          {children}
+        </motion.div>
+      )
+    }
+
+    export default function ScrollFadeDemo() {
+      return (
+        <div className="space-y-32 p-8">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <FadeInSection key={i}>
+              <div className="p-8 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg">
+                Section {i}
+              </div>
+            </FadeInSection>
+          ))}
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Parallax Effect">
+    ```tsx
+    import { motion, useScroll, useTransform } from 'framer-motion'
+    import { useRef } from 'react'
+
+    export default function ParallaxDemo() {
+      const ref = useRef(null)
+      const { scrollYProgress } = useScroll({
+        target: ref,
+        offset: ['start start', 'end start']
+      })
+
+      const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%'])
+      const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 0])
+
+      return (
+        <div ref={ref} className="h-[200vh] relative">
+          <motion.div
+            style={{ y, opacity }}
+            className="sticky top-0 h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600 text-white text-6xl font-bold"
+          >
+            Parallax Effect
+          </motion.div>
+        </div>
+      )
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## How it works
+
+Scroll animations use the scroll position to drive animations:
+
+<Steps>
+  <Step title="Track scroll position">
+    Use `useScroll()` to get scroll progress values (0 to 1).
+  </Step>
+  
+  <Step title="Transform values">
+    Convert scroll progress to animation values using `useTransform()`.
+  </Step>
+  
+  <Step title="Apply to elements">
+    Link transformed values to element properties via the `style` prop.
+  </Step>
+  
+  <Step title="Add smoothing">
+    Use `useSpring()` to smooth jerky scroll movements.
+  </Step>
+</Steps>
+
+### Scroll hooks
+
+<CardGroup cols={2}>
+  <Card title="useScroll" icon="scroll">
+    Tracks scroll position and returns progress values
+  </Card>
+  
+  <Card title="useInView" icon="eye">
+    Detects when elements enter/leave the viewport
+  </Card>
+  
+  <Card title="useTransform" icon="arrow-progress">
+    Maps scroll values to animation properties
+  </Card>
+  
+  <Card title="useSpring" icon="wave-square">
+    Adds smooth spring physics to scroll values
+  </Card>
+</CardGroup>
+
+## Variations
+
+### Staggered scroll reveals
+
+Reveal items with delay as they enter view:
+
+```tsx
+import { motion } from 'framer-motion'
+import { useInView } from 'framer-motion'
+import { useRef } from 'react'
+
+function StaggeredReveal({ items }) {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true })
+
+  return (
+    <div ref={ref}>
+      {items.map((item, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, x: -50 }}
+          animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
+          transition={{ delay: i * 0.1, duration: 0.5 }}
+          className="p-4 mb-4 bg-white rounded-lg shadow"
+        >
+          {item}
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+```
+
+### Scroll-driven counter
+
+Animate numbers based on scroll:
+
+```tsx
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { useRef, useEffect, useState } from 'react'
+
+function ScrollCounter({ target = 100 }) {
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start']
+  })
+  
+  const count = useTransform(scrollYProgress, [0, 1], [0, target])
+  const springCount = useSpring(count, { stiffness: 100, damping: 30 })
+  const [displayCount, setDisplayCount] = useState(0)
+
+  useEffect(() => {
+    return springCount.onChange(v => setDisplayCount(Math.round(v)))
+  }, [])
+
+  return (
+    <div ref={ref} className="h-screen flex items-center justify-center">
+      <motion.div className="text-6xl font-bold text-blue-500">
+        {displayCount}
+      </motion.div>
+    </div>
+  )
+}
+```
+
+### Horizontal scroll sections
+
+Scroll horizontally through sections:
+
+```tsx
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { useRef } from 'react'
+
+function HorizontalScroll() {
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({ target: ref })
+  const x = useTransform(scrollYProgress, [0, 1], ['0%', '-75%'])
+
+  return (
+    <div ref={ref} className="h-[400vh] relative">
+      <div className="sticky top-0 h-screen overflow-hidden">
+        <motion.div style={{ x }} className="flex h-full">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="min-w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500 text-white text-6xl font-bold"
+            >
+              Section {i}
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </div>
+  )
+}
+```
+
+### Image reveal on scroll
+
+Reveal image as user scrolls:
+
+```tsx
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { useRef } from 'react'
+
+function ImageReveal({ src }) {
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start']
+  })
+
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1, 0.8])
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0])
+
+  return (
+    <div ref={ref} className="h-screen flex items-center justify-center">
+      <motion.img
+        src={src}
+        style={{ scale, opacity }}
+        className="max-w-2xl rounded-lg shadow-2xl"
+      />
+    </div>
+  )
+}
+```
+
+## Example from the playground
+
+From the ReactAnimations component:
+
+```tsx
+import { useScroll, useSpring, motion } from 'framer-motion'
+
+function ScrollAnimation() {
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  })
+
+  return (
+    <motion.div
+      style={{ scaleX }}
+      className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left"
+    />
+  )
+}
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Use 'once' for entrance animations">
+    Prevent elements from re-animating when scrolling back up.
+    
+    ```tsx
+    const isInView = useInView(ref, { once: true })
+    ```
+  </Accordion>
+  
+  <Accordion title="Add margin to triggers">
+    Trigger animations slightly before elements enter viewport.
+    
+    ```tsx
+    const isInView = useInView(ref, { margin: '-100px' })
+    ```
+  </Accordion>
+  
+  <Accordion title="Smooth with springs">
+    Apply spring physics to scroll-driven values for smoother motion.
+    
+    ```tsx
+    const smoothProgress = useSpring(scrollYProgress, {
+      stiffness: 100,
+      damping: 30
+    })
+    ```
+  </Accordion>
+  
+  <Accordion title="Optimize performance">
+    Use `will-change` CSS property and avoid animating expensive properties.
+    
+    ```tsx
+    <motion.div style={{ willChange: 'transform' }} />
+    ```
+  </Accordion>
+  
+  <Accordion title="Respect reduced motion">
+    Disable scroll animations for users with motion sensitivity.
+    
+    ```tsx
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Common use cases
+
+- Scroll progress indicators
+- Fade-in content on scroll
+- Parallax backgrounds
+- Sticky headers with animations
+- Horizontal scrolling galleries
+- Scroll-driven counters
+- Image reveals
+- Section transitions
+
+## Performance tips
+
+<Warning>
+  Scroll animations can impact performance on lower-end devices. Test thoroughly and provide fallbacks.
+</Warning>
+
+```tsx
+// Good - GPU accelerated
+<motion.div style={{ y, opacity }} />
+
+// Avoid - causes layout recalc
+<motion.div style={{ top: scrollY, height: scrollHeight }} />
+```
+
+## Advanced: Section-based scroll
+
+Animate based on specific section visibility:
+
+```tsx
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { useRef } from 'react'
+
+function SectionScroll() {
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start']
+  })
+
+  const backgroundColor = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    ['#3B82F6', '#8B5CF6', '#EC4899']
+  )
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ backgroundColor }}
+      className="h-screen flex items-center justify-center text-white text-4xl font-bold"
+    >
+      Color changes as you scroll
+    </motion.div>
+  )
+}
+```
+
+## Related examples
+
+<CardGroup cols={3}>
+  <Card title="Fade in" icon="eye" href="/examples/fade-in">
+    Basic opacity transitions
+  </Card>
+  
+  <Card title="Drag gesture" icon="hand-pointer" href="/examples/drag-gesture">
+    Interactive drag animations
+  </Card>
+  
+  <Card title="Slide in" icon="arrow-right" href="/examples/slide-in">
+    Directional animations
+  </Card>
+</CardGroup>

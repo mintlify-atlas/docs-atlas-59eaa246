@@ -1,0 +1,420 @@
+---
+title: Bounce animation
+description: Create playful bouncing effects using spring physics and keyframe animations
+---
+
+## Live demo
+
+Bounce animations simulate elastic, spring-like motion that creates a playful, energetic feel. They're perfect for drawing attention, celebrating actions, and adding personality to your interface.
+
+<Note>
+  Bounce animations work best with spring physics for natural motion or carefully crafted easing curves.
+</Note>
+
+## Complete code example
+
+<Tabs>
+  <Tab title="Framer Motion">
+    ```tsx
+    import { motion } from 'framer-motion'
+
+    export default function BounceDemo() {
+      return (
+        <div className="space-y-8">
+          {/* Vertical bounce */}
+          <motion.div
+            animate={{
+              y: [0, -50, 0],
+              scale: [1, 0.9, 1]
+            }}
+            transition={{
+              duration: 0.8,
+              repeat: Infinity,
+              repeatType: 'reverse',
+              ease: 'easeOut'
+            }}
+            className="w-24 h-24 bg-blue-500 rounded-lg mx-auto"
+          />
+
+          {/* Spring bounce on click */}
+          <motion.button
+            whileTap={{
+              scale: 0.9,
+              y: 5
+            }}
+            transition={{
+              type: 'spring',
+              stiffness: 400,
+              damping: 10
+            }}
+            className="px-6 py-3 bg-purple-500 text-white rounded-lg"
+          >
+            Bounce on click
+          </motion.button>
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="React Spring">
+    ```tsx
+    import { useSpring, animated } from '@react-spring/web'
+    import { useState } from 'react'
+
+    export default function BounceDemo() {
+      const [trigger, setTrigger] = useState(false)
+
+      const bounceProps = useSpring({
+        transform: trigger
+          ? 'translateY(-50px) scale(0.9)'
+          : 'translateY(0px) scale(1)',
+        config: {
+          tension: 300,
+          friction: 10
+        }
+      })
+
+      return (
+        <div>
+          <animated.div
+            style={{
+              ...bounceProps,
+              width: '6rem',
+              height: '6rem',
+              background: '#8B5CF6',
+              borderRadius: '0.5rem',
+              margin: '0 auto',
+              cursor: 'pointer'
+            }}
+            onClick={() => setTrigger(!trigger)}
+          />
+        </div>
+      )
+    }
+    ```
+  </Tab>
+  
+  <Tab title="CSS">
+    ```tsx
+    import './bounce.css'
+
+    export default function BounceDemo() {
+      return (
+        <div className="space-y-8">
+          <div className="bounce-vertical w-24 h-24 bg-blue-500 rounded-lg mx-auto" />
+          <div className="bounce-scale w-24 h-24 bg-purple-500 rounded-full mx-auto" />
+        </div>
+      )
+    }
+    ```
+    
+    ```css bounce.css
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-50px);
+      }
+    }
+
+    @keyframes bounce-scale {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .bounce-vertical {
+      animation: bounce 0.8s ease-out infinite;
+    }
+
+    .bounce-scale {
+      animation: bounce-scale 1s ease-in-out infinite;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## How it works
+
+Bounce animations simulate elastic motion:
+
+<Steps>
+  <Step title="Define motion path">
+    Set keyframes for the bounce trajectory, typically using Y-axis translation.
+  </Step>
+  
+  <Step title="Add squash and stretch">
+    Include subtle scale changes to enhance the bouncing effect.
+  </Step>
+  
+  <Step title="Apply easing">
+    Use `ease-out` for natural deceleration or spring physics for elastic bounce.
+  </Step>
+</Steps>
+
+### Bounce types
+
+<CardGroup cols={2}>
+  <Card title="Vertical bounce" icon="arrows-up-down">
+    Classic up-and-down bouncing motion
+  </Card>
+  
+  <Card title="Scale bounce" icon="expand">
+    Growing and shrinking for pulsing effect
+  </Card>
+  
+  <Card title="Elastic bounce" icon="wave-square">
+    Overshoot and settle with spring physics
+  </Card>
+  
+  <Card title="Multiple bounces" icon="layer-group">
+    Decreasing amplitude for realistic physics
+  </Card>
+</CardGroup>
+
+## Variations
+
+### Realistic bounce
+
+Multiple bounces with decreasing height:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function RealisticBounce() {
+  return (
+    <motion.div
+      animate={{
+        y: [0, -100, 0, -60, 0, -30, 0, -10, 0]
+      }}
+      transition={{
+        duration: 2,
+        times: [0, 0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+        ease: 'easeOut'
+      }}
+      className="w-16 h-16 bg-blue-500 rounded-full"
+    />
+  )
+}
+```
+
+### Button bounce feedback
+
+Bounce on user interaction:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function BounceButton() {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      animate={{ y: [0, -5, 0] }}
+      transition={{
+        y: {
+          duration: 0.5,
+          repeat: Infinity,
+          repeatType: 'reverse',
+          ease: 'easeInOut'
+        }
+      }}
+      className="px-6 py-3 bg-green-500 text-white rounded-lg"
+    >
+      Bouncing CTA
+    </motion.button>
+  )
+}
+```
+
+### Loading bounce
+
+Three dots bouncing in sequence:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function LoadingDots() {
+  const bounceTransition = {
+    duration: 0.5,
+    repeat: Infinity,
+    repeatType: 'reverse' as const,
+    ease: 'easeOut'
+  }
+
+  return (
+    <div className="flex gap-2">
+      <motion.div
+        animate={{ y: [0, -20, 0] }}
+        transition={{ ...bounceTransition, delay: 0 }}
+        className="w-4 h-4 bg-blue-500 rounded-full"
+      />
+      <motion.div
+        animate={{ y: [0, -20, 0] }}
+        transition={{ ...bounceTransition, delay: 0.15 }}
+        className="w-4 h-4 bg-blue-500 rounded-full"
+      />
+      <motion.div
+        animate={{ y: [0, -20, 0] }}
+        transition={{ ...bounceTransition, delay: 0.3 }}
+        className="w-4 h-4 bg-blue-500 rounded-full"
+      />
+    </div>
+  )
+}
+```
+
+### Elastic entrance
+
+Spring-based bounce for entrances:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function ElasticEntrance() {
+  return (
+    <motion.div
+      initial={{ scale: 0, y: 100 }}
+      animate={{ scale: 1, y: 0 }}
+      transition={{
+        type: 'spring',
+        stiffness: 260,
+        damping: 10
+      }}
+      className="p-6 bg-purple-500 text-white rounded-lg"
+    >
+      I bounce in!
+    </motion.div>
+  )
+}
+```
+
+## Example from the playground
+
+From the CSSAnimations component:
+
+```tsx
+const presets = {
+  bounce: `
+.animated-element {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-50px); }
+}`,
+}
+```
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Use spring physics for realism">
+    Spring-based bounces feel more natural than keyframe animations.
+    
+    ```tsx
+    // Natural spring bounce
+    transition={{ type: 'spring', stiffness: 300, damping: 10 }}
+    
+    // Less natural keyframe
+    transition={{ duration: 0.5, ease: 'easeOut' }}
+    ```
+  </Accordion>
+  
+  <Accordion title="Add squash and stretch">
+    Subtle scale changes during bounce enhance the effect.
+    
+    ```tsx
+    animate={{
+      y: [0, -50, 0],
+      scaleY: [1, 0.9, 1],  // Squash on impact
+      scaleX: [1, 1.1, 1]   // Stretch horizontally
+    }}
+    ```
+  </Accordion>
+  
+  <Accordion title="Don't overuse">
+    Bounce animations are attention-grabbing. Use them sparingly for important actions or feedback.
+  </Accordion>
+  
+  <Accordion title="Consider context">
+    Playful bounces work great for casual apps but may not suit professional or serious contexts.
+  </Accordion>
+</AccordionGroup>
+
+## Common use cases
+
+- Loading indicators
+- Success confirmations
+- Call-to-action buttons
+- Notification badges
+- Game elements
+- Playful micro-interactions
+- Error shake (horizontal bounce)
+- Scroll-to-top buttons
+
+## Performance tips
+
+<Warning>
+  Use `transform` properties for bouncing. Avoid animating `top`, `bottom`, or `margin` as they cause layout recalculations.
+</Warning>
+
+```tsx
+// Good - GPU accelerated
+<motion.div animate={{ y: -50 }} />
+
+// Bad - causes layout recalc
+<motion.div animate={{ marginTop: -50 }} />
+```
+
+## Advanced: Physics-based bounce
+
+Create realistic physics with decreasing amplitude:
+
+```tsx
+import { motion } from 'framer-motion'
+
+function PhysicsBounce() {
+  return (
+    <motion.div
+      animate={{
+        y: [0, -120, 0, -80, 0, -40, 0, -20, 0, -5, 0]
+      }}
+      transition={{
+        duration: 3,
+        times: [0, 0.15, 0.3, 0.45, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1],
+        ease: 'linear'
+      }}
+      className="w-20 h-20 bg-red-500 rounded-full"
+    />
+  )
+}
+```
+
+## Related examples
+
+<CardGroup cols={3}>
+  <Card title="Scale" icon="expand" href="/examples/scale">
+    Grow and shrink animations
+  </Card>
+  
+  <Card title="Pulse" icon="heart" href="/examples/pulse">
+    Rhythmic pulsing effects
+  </Card>
+  
+  <Card title="Rotate" icon="rotate" href="/examples/rotate">
+    Spinning animations
+  </Card>
+</CardGroup>

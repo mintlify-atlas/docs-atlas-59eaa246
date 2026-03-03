@@ -1,0 +1,93 @@
+---
+title: TimingDemo component
+description: Interactive comparison of CSS timing functions and their effects on animations
+---
+
+The `TimingDemo` component provides a side-by-side comparison of different timing functions, allowing users to see how each affects animation progression.
+
+## Timing functions demonstrated
+
+The component showcases five standard timing functions:
+
+<CardGroup cols={2}>
+  <Card title="linear" icon="chart-line">
+    Constant speed from start to finish
+  </Card>
+  <Card title="ease" icon="wave-sine">
+    Slow start, fast middle, slow end (default)
+  </Card>
+  <Card title="ease-in" icon="arrow-trend-up">
+    Slow start, accelerates to end
+  </Card>
+  <Card title="ease-out" icon="arrow-trend-down">
+    Fast start, decelerates to end
+  </Card>
+  <Card title="ease-in-out" icon="arrows-left-right">
+    Slow start and end, fast middle
+  </Card>
+</CardGroup>
+
+## Component implementation
+
+```tsx
+const timingFunctions = [
+  { name: 'linear', description: 'Constant speed throughout' },
+  { name: 'ease', description: 'Slow start and end, fast middle' },
+  { name: 'ease-in', description: 'Slow start, accelerates' },
+  { name: 'ease-out', description: 'Fast start, decelerates' },
+  { name: 'ease-in-out', description: 'Very smooth start and end' }
+]
+```
+
+Each timing function is applied to an animated element that moves horizontally, making the differences clearly visible.
+
+## Interactive features
+
+- **Play button** - Triggers all animations simultaneously
+- **Reset button** - Returns elements to starting position
+- **Visual comparison** - Elements animate side-by-side for easy comparison
+- **Labels** - Each animated element shows its timing function name
+
+## Usage in the playground
+
+```tsx
+import TimingDemo from './components/TimingDemo'
+
+<section>
+  <h2>Timing Functions</h2>
+  <p>Explore how different timing functions affect the feel of animations.</p>
+  <TimingDemo />
+</section>
+```
+
+## When to use each timing function
+
+<Accordion title="linear">
+  Best for continuous animations like loading spinners or progress indicators. Creates mechanical, consistent motion.
+</Accordion>
+
+<Accordion title="ease">
+  The default and most natural-feeling option. Good for general UI animations.
+</Accordion>
+
+<Accordion title="ease-in">
+  Great for elements exiting the screen or fading out. Creates an accelerating motion.
+</Accordion>
+
+<Accordion title="ease-out">
+  Perfect for elements entering the screen. Creates a decelerating, settling motion.
+</Accordion>
+
+<Accordion title="ease-in-out">
+  Ideal for animations that move elements from one position to another. Very smooth.
+</Accordion>
+
+<Tip>
+  For more control, use cubic-bezier() to create custom timing functions. Tools like [cubic-bezier.com](https://cubic-bezier.com) help visualize custom curves.
+</Tip>
+
+## Related
+
+- [Timing functions concept](/concepts/timing-functions)
+- [CSS animations](/techniques/css-animations)
+- [Performance tips](/reference/optimization)

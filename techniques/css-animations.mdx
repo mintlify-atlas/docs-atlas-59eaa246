@@ -1,0 +1,238 @@
+---
+title: CSS animations
+description: Learn how to create smooth, performant animations using pure CSS with keyframes, timing functions, and animation properties
+---
+
+CSS animations provide a declarative way to create smooth, performant animations without JavaScript. They're ideal for simple transitions and looping animations.
+
+## Keyframe definitions
+
+Keyframes define the states of your animation at specific points in time. Here are real examples from the Animation Playground:
+
+<CodeGroup>
+
+```css Fade in
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+```
+
+```css Slide in
+@keyframes slide-in {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(0); }
+}
+```
+
+```css Rotate
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+```
+
+```css Pulse
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+```
+
+```css Bounce
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-30px); }
+}
+```
+
+</CodeGroup>
+
+## Animation properties
+
+### Duration
+
+Controls how long one animation cycle takes to complete:
+
+```css
+.element {
+  animation-duration: 1s;     /* 1 second */
+  animation-duration: 2s;     /* 2 seconds */
+  animation-duration: 500ms;  /* 500 milliseconds */
+}
+```
+
+### Timing function
+
+Controls the acceleration curve of the animation:
+
+<CodeGroup>
+
+```css Linear
+.element {
+  animation-timing-function: linear;
+  /* Constant speed throughout */
+}
+```
+
+```css Ease
+.element {
+  animation-timing-function: ease;
+  /* Slow start, fast middle, slow end */
+}
+```
+
+```css Ease in
+.element {
+  animation-timing-function: ease-in;
+  /* Slow start, then accelerates */
+}
+```
+
+```css Ease out
+.element {
+  animation-timing-function: ease-out;
+  /* Fast start, then decelerates */
+}
+```
+
+```css Ease in out
+.element {
+  animation-timing-function: ease-in-out;
+  /* Slow start and end */
+}
+```
+
+</CodeGroup>
+
+### Iteration count
+
+Defines how many times the animation repeats:
+
+```css
+.element {
+  animation-iteration-count: 1;        /* Plays once */
+  animation-iteration-count: 3;        /* Plays 3 times */
+  animation-iteration-count: infinite; /* Loops forever */
+}
+```
+
+### Direction
+
+Controls whether the animation plays forward, backward, or alternates:
+
+<CodeGroup>
+
+```css Normal
+.element {
+  animation-direction: normal;
+  /* Always plays forward */
+}
+```
+
+```css Reverse
+.element {
+  animation-direction: reverse;
+  /* Always plays backward */
+}
+```
+
+```css Alternate
+.element {
+  animation-direction: alternate;
+  /* Forward, then backward */
+}
+```
+
+```css Alternate reverse
+.element {
+  animation-direction: alternate-reverse;
+  /* Backward, then forward */
+}
+```
+
+</CodeGroup>
+
+## Complete examples
+
+Here's how to combine all properties together:
+
+<CodeGroup>
+
+```css Shorthand
+.element {
+  animation: fade-in 1s ease infinite alternate;
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+```
+
+```css Longhand
+.element {
+  animation-name: fade-in;
+  animation-duration: 1s;
+  animation-timing-function: ease;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+```
+
+```css Multiple keyframes
+.element {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+```
+
+</CodeGroup>
+
+## Animation control
+
+You can pause and resume animations with JavaScript:
+
+```tsx
+const getAnimationStyle = () => {
+  return {
+    animationName: 'fade-in',
+    animationDuration: '1s',
+    animationTimingFunction: 'ease',
+    animationIterationCount: 'infinite',
+    animationDirection: 'alternate',
+    animationPlayState: isPaused ? 'paused' : 'running'
+  }
+}
+```
+
+## Best practices
+
+- Use `transform` and `opacity` for the best performance
+- Avoid animating `width`, `height`, or `margin` as they trigger layout recalculation
+- Keep animations under 300ms for UI feedback
+- Use `will-change` sparingly to hint at upcoming animations
+- Test on lower-end devices to ensure smooth playback
+
+## When to use CSS animations
+
+CSS animations are ideal for:
+
+- Simple looping animations
+- Hover and focus states
+- Loading spinners and indicators
+- Entrance and exit animations
+- Animations that don't require dynamic values
+
+For more complex scenarios involving user interaction or dynamic calculations, consider JavaScript animations instead.

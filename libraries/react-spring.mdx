@@ -1,0 +1,280 @@
+---
+title: React Spring
+description: A spring-physics based animation library for React that creates natural, fluid motion
+---
+
+## Installation
+
+Install React Spring via npm or yarn:
+
+<CodeGroup>
+```bash npm
+npm install @react-spring/web
+```
+
+```bash yarn
+yarn add @react-spring/web
+```
+
+```bash pnpm
+pnpm add @react-spring/web
+```
+</CodeGroup>
+
+## Basic usage
+
+React Spring uses spring-physics to create natural-looking animations. The core hook is `useSpring`, which returns animated values you can apply to elements.
+
+```tsx
+import { useSpring, animated } from '@react-spring/web'
+import { useState } from 'react'
+
+function SpringAnimation() {
+  const [isVisible, setIsVisible] = useState(true)
+  
+  const springProps = useSpring({
+    scale: isVisible ? 1 : 0,
+    opacity: isVisible ? 1 : 0,
+    config: { tension: 300, friction: 10 }
+  })
+
+  return (
+    <>
+      <animated.div
+        style={{
+          ...springProps,
+          width: 100,
+          height: 100,
+          background: '#10B981',
+          borderRadius: 8
+        }}
+      />
+      <button onClick={() => setIsVisible(!isVisible)}>
+        Toggle
+      </button>
+    </>
+  )
+}
+```
+
+### Configuration options
+
+React Spring provides intuitive physics-based configuration:
+
+<Tabs>
+  <Tab title="Tension">
+    Controls the spring's strength. Higher values create faster, snappier animations.
+    
+    ```tsx
+    config: { tension: 300 } // Snappy
+    config: { tension: 100 } // Gentle
+    ```
+  </Tab>
+  
+  <Tab title="Friction">
+    Controls resistance. Lower values create more bouncy animations.
+    
+    ```tsx
+    config: { friction: 10 } // Very bouncy
+    config: { friction: 40 } // Smooth stop
+    ```
+  </Tab>
+  
+  <Tab title="Presets">
+    Use built-in presets for common animation types.
+    
+    ```tsx
+    import { config } from '@react-spring/web'
+    
+    useSpring({
+      config: config.default,  // Default spring
+      // config: config.gentle,   // Gentle movement
+      // config: config.wobbly,   // Bouncy effect
+      // config: config.stiff,    // Quick and stiff
+      // config: config.slow,     // Slow motion
+    })
+    ```
+  </Tab>
+</Tabs>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Spring physics" icon="atom">
+    Natural motion based on spring physics rather than duration-based easing curves.
+  </Card>
+  
+  <Card title="Interpolation" icon="arrow-progress">
+    Smoothly interpolate between any values including colors, transforms, and custom properties.
+  </Card>
+  
+  <Card title="Performance" icon="gauge-high">
+    Runs animations off the main thread for smooth 60fps performance.
+  </Card>
+  
+  <Card title="Declarative" icon="code">
+    Define what you want animated, not how it should animate.
+  </Card>
+</CardGroup>
+
+### Multiple values with useSpring
+
+Animate multiple properties simultaneously:
+
+```tsx
+const props = useSpring({
+  from: { opacity: 0, transform: 'translateY(-40px)' },
+  to: { opacity: 1, transform: 'translateY(0px)' },
+  config: { tension: 300, friction: 20 }
+})
+
+return <animated.div style={props}>Content</animated.div>
+```
+
+### Chaining animations with useChain
+
+Orchestrate multiple animations in sequence:
+
+```tsx
+import { useSpring, useChain, useSpringRef } from '@react-spring/web'
+
+function ChainedAnimation() {
+  const springRef = useSpringRef()
+  const spring = useSpring({
+    ref: springRef,
+    from: { scale: 0 },
+    to: { scale: 1 }
+  })
+  
+  const fadeRef = useSpringRef()
+  const fade = useSpring({
+    ref: fadeRef,
+    from: { opacity: 0 },
+    to: { opacity: 1 }
+  })
+  
+  useChain([springRef, fadeRef], [0, 0.5])
+  
+  return <animated.div style={{ ...spring, ...fade }} />
+}
+```
+
+### Trail animations
+
+Animate a list of items with a stagger effect:
+
+```tsx
+import { useTrail, animated } from '@react-spring/web'
+
+function Trail({ items }) {
+  const trail = useTrail(items.length, {
+    from: { opacity: 0, x: -20 },
+    to: { opacity: 1, x: 0 }
+  })
+  
+  return trail.map((props, index) => (
+    <animated.div key={index} style={props}>
+      {items[index]}
+    </animated.div>
+  ))
+}
+```
+
+## When to use it
+
+<AccordionGroup>
+  <Accordion title="Natural, physics-based motion">
+    Choose React Spring when you want animations that feel natural and organic, mimicking real-world physics instead of artificial easing curves.
+  </Accordion>
+  
+  <Accordion title="Minimal configuration">
+    Perfect when you want great-looking animations without tweaking duration and easing values. Spring physics automatically creates smooth motion.
+  </Accordion>
+  
+  <Accordion title="Dynamic animations">
+    Ideal for animations that change direction mid-flight or respond to rapidly changing data without jarring transitions.
+  </Accordion>
+  
+  <Accordion title="Performance-critical apps">
+    React Spring runs animations off the main thread, making it excellent for performance-sensitive applications.
+  </Accordion>
+</AccordionGroup>
+
+## Comparison with Framer Motion
+
+Both libraries are excellent choices, but they have different philosophies:
+
+<Tabs>
+  <Tab title="React Spring">
+    **Strengths:**
+    - Spring-physics based (more natural motion)
+    - Smaller bundle size
+    - Automatic interruption handling
+    - Runs off main thread
+    
+    **Best for:**
+    - Data visualizations
+    - Smooth, natural transitions
+    - Performance-critical applications
+  </Tab>
+  
+  <Tab title="Framer Motion">
+    **Strengths:**
+    - More intuitive declarative API
+    - Built-in gesture support
+    - Exit animations with AnimatePresence
+    - Layout animations
+    
+    **Best for:**
+    - UI component animations
+    - Gesture-based interactions
+    - Rapid prototyping
+  </Tab>
+</Tabs>
+
+## Example from the playground
+
+Here's the comparison demo from the Animation Playground:
+
+```tsx
+import { useSpring, animated } from '@react-spring/web'
+import { useState } from 'react'
+
+function ComparisonDemo() {
+  const [isVisible, setIsVisible] = useState(true)
+
+  const springStyle = useSpring({
+    scale: isVisible ? 1 : 0,
+    config: { tension: 300, friction: 20 }
+  })
+
+  return (
+    <div>
+      <animated.div
+        style={{
+          ...springStyle,
+          width: '8rem',
+          height: '8rem',
+          backgroundColor: '#10B981',
+          borderRadius: '0.5rem'
+        }}
+      />
+      <button onClick={() => setIsVisible(!isVisible)}>
+        Toggle Animation
+      </button>
+    </div>
+  )
+}
+```
+
+## Learn more
+
+<CardGroup cols={2}>
+  <Card title="Animation examples" icon="play" href="/examples/fade-in">
+    See React Spring in action
+  </Card>
+  
+  <Card title="Official docs" icon="book" href="https://www.react-spring.dev/">
+    Visit the React Spring documentation
+  </Card>
+</CardGroup>

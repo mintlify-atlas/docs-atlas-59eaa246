@@ -1,0 +1,281 @@
+---
+title: Animation playground
+description: Interactive keyframe timeline editor for creating custom web animations
+---
+
+The Animation Playground is an interactive tool that lets you create custom animations visually using a keyframe-based timeline editor. Build complex animations by defining keyframes with different property values, then preview and export your work.
+
+## Overview
+
+The playground provides a drag-and-drop interface for creating animations without writing code. You can:
+
+- Define multiple keyframes along a timeline
+- Adjust transformation and visual properties
+- Preview animations in real-time
+- Reorder keyframes by dragging
+- Export animation code for use in your projects
+
+## Keyframe timeline editor
+
+The timeline editor is the core of the playground, allowing you to control every aspect of your animation.
+
+### Adding keyframes
+
+Keyframes represent specific points in your animation where properties have defined values. Each keyframe includes:
+
+- **Time position**: When in the animation this keyframe occurs
+- **Properties**: Visual and transformation values at this point
+
+<Info>
+New keyframes automatically inherit property values from the previous keyframe, making it easy to create smooth transitions.
+</Info>
+
+Click the "Add Keyframe" button to create a new step in your animation. The component creates keyframes with this structure:
+
+```tsx
+type KeyframeStep = {
+  id: string
+  time: number
+  properties: {
+    x: number
+    y: number
+    scale: number
+    rotate: number
+    opacity: number
+  }
+}
+```
+
+### Adjustable properties
+
+Each keyframe lets you control five animation properties:
+
+<CardGroup cols={2}>
+  <Card title="Position (x, y)" icon="arrows-up-down-left-right">
+    Move elements horizontally and vertically. Range: -200px to 200px
+  </Card>
+  <Card title="Scale" icon="up-right-and-down-left-from-center">
+    Resize elements proportionally. Range: 0.5x to 3x
+  </Card>
+  <Card title="Rotation" icon="rotate">
+    Rotate elements in degrees. Range: -200° to 200°
+  </Card>
+  <Card title="Opacity" icon="eye">
+    Control element transparency. Range: 0 (invisible) to 1 (solid)
+  </Card>
+</CardGroup>
+
+Adjust properties using the slider controls within each keyframe panel:
+
+```tsx
+<input
+  type="range"
+  min={property === 'opacity' ? 0 : property === 'scale' ? 0.5 : -200}
+  max={property === 'opacity' ? 1 : property === 'scale' ? 3 : 200}
+  step={property === 'opacity' ? 0.1 : property === 'scale' ? 0.1 : 1}
+  value={frame.properties[property]}
+  onChange={(e) => updateKeyframe(frame.id, property, parseFloat(e.target.value))}
+/>
+```
+
+### Reordering keyframes
+
+The playground uses Framer Motion's Reorder component to enable drag-and-drop reordering:
+
+```tsx
+<Reorder.Group axis="y" values={keyframes} onReorder={setKeyframes}>
+  {keyframes.map((frame) => (
+    <Reorder.Item
+      key={frame.id}
+      value={frame}
+      className="p-4 rounded-lg cursor-move"
+    >
+      {/* Keyframe controls */}
+    </Reorder.Item>
+  ))}
+</Reorder.Group>
+```
+
+Simply drag a keyframe up or down to change the sequence of your animation.
+
+## Creating custom animations
+
+Follow this workflow to build your animations:
+
+<Steps>
+  <Step title="Start with the default keyframe">
+    The playground begins with a single keyframe at time 0 with neutral properties (no transformation).
+  </Step>
+  
+  <Step title="Add keyframes for each animation step">
+    Click "Add Keyframe" to create new points in your timeline. Each new keyframe starts with the previous keyframe's values.
+  </Step>
+  
+  <Step title="Adjust properties at each keyframe">
+    Select a keyframe by clicking on it, then use the sliders to set property values. The preview updates as you adjust.
+  </Step>
+  
+  <Step title="Preview your animation">
+    Click "Play" to see your animation run continuously. The element animates through all keyframes in sequence.
+  </Step>
+  
+  <Step title="Fine-tune the timing">
+    Reorder keyframes by dragging, or adjust individual property values until you achieve the desired effect.
+  </Step>
+</Steps>
+
+### Example: Bounce animation
+
+Create a bouncing effect:
+
+1. **Keyframe 1** (time 0): `y: 0, scale: 1`
+2. **Keyframe 2** (time 1): `y: -50, scale: 1.2`
+3. **Keyframe 3** (time 2): `y: 0, scale: 0.8`
+4. **Keyframe 4** (time 3): `y: 0, scale: 1`
+
+This creates a bounce with squash and stretch for natural motion.
+
+## Preview functionality
+
+The playground offers two preview modes:
+
+### Static preview
+
+Click on any keyframe to see that specific state without playing the animation:
+
+```tsx
+animate={keyframes.find(k => k.id === selectedStep)?.properties}
+transition={{ duration: 0.3 }}
+```
+
+The element smoothly transitions to the selected keyframe's state.
+
+### Animation preview
+
+Click "Play" to see the full animation loop continuously:
+
+```tsx
+animate={isPlaying ? {
+  x: getAnimationValues('x'),
+  y: getAnimationValues('y'),
+  scale: getAnimationValues('scale'),
+  rotate: getAnimationValues('rotate'),
+  opacity: getAnimationValues('opacity')
+} : currentState}
+transition={isPlaying ? {
+  duration: keyframes.length,
+  times: keyframes.map(k => k.time / keyframes.length),
+  repeat: Infinity
+} : { duration: 0.3 }}
+```
+
+The animation uses the `times` property to ensure each keyframe occurs at the correct point in the timeline.
+
+## Export and copy functionality
+
+While the current implementation focuses on visual editing, you can extend it to export animation code:
+
+### Framer Motion format
+
+```tsx
+const exportFramerMotion = () => {
+  const animateProps = {
+    x: keyframes.map(k => k.properties.x),
+    y: keyframes.map(k => k.properties.y),
+    scale: keyframes.map(k => k.properties.scale),
+    rotate: keyframes.map(k => k.properties.rotate),
+    opacity: keyframes.map(k => k.properties.opacity)
+  }
+  
+  return `<motion.div
+  animate={${JSON.stringify(animateProps, null, 2)}}
+  transition={{
+    duration: ${keyframes.length},
+    times: [${keyframes.map(k => k.time / keyframes.length).join(', ')}],
+    repeat: Infinity
+  }}
+/>`
+}
+```
+
+### CSS keyframes format
+
+```tsx
+const exportCSS = () => {
+  const frames = keyframes.map((k, i) => {
+    const percent = (k.time / keyframes.length) * 100
+    return `  ${percent}% {
+    transform: translateX(${k.properties.x}px) 
+               translateY(${k.properties.y}px) 
+               scale(${k.properties.scale}) 
+               rotate(${k.properties.rotate}deg);
+    opacity: ${k.properties.opacity};
+  }`
+  }).join('\n')
+  
+  return `@keyframes customAnimation {
+${frames}
+}`
+}
+```
+
+## Real usage examples
+
+### Loading indicator
+
+Create a pulsing loader:
+
+- **Keyframe 1**: `scale: 1, opacity: 1`
+- **Keyframe 2**: `scale: 1.3, opacity: 0.5`
+- **Keyframe 3**: `scale: 1, opacity: 1`
+
+### Attention grabber
+
+Draw attention to an element:
+
+- **Keyframe 1**: `x: 0, rotate: 0`
+- **Keyframe 2**: `x: 10, rotate: 5`
+- **Keyframe 3**: `x: -10, rotate: -5`
+- **Keyframe 4**: `x: 0, rotate: 0`
+
+### Fade and slide entrance
+
+Smooth content entrance:
+
+- **Keyframe 1**: `y: 50, opacity: 0`
+- **Keyframe 2**: `y: 0, opacity: 1`
+
+<Tip>
+Use the playground to experiment with different combinations and discover unique animation styles for your projects.
+</Tip>
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Keep animations short">
+    Most web animations should complete in 0.3-0.6 seconds. Longer animations can feel sluggish and frustrate users.
+  </Accordion>
+  
+  <Accordion title="Use appropriate property ranges">
+    Subtle animations are often more effective. Try scale values between 0.95-1.05 for gentle effects.
+  </Accordion>
+  
+  <Accordion title="Consider performance">
+    The playground animates transform and opacity properties, which are hardware-accelerated and perform well.
+  </Accordion>
+  
+  <Accordion title="Test with different content">
+    Animations that work for one element size might not work for another. Test with various content sizes.
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Animation comparison" icon="code-compare" href="/tools/animation-comparison">
+    Compare different animation techniques side-by-side
+  </Card>
+  <Card title="Performance metrics" icon="gauge" href="/tools/performance-metrics">
+    Monitor and optimize animation performance
+  </Card>
+</CardGroup>

@@ -1,0 +1,334 @@
+---
+title: Browser support
+description: CSS animation compatibility, JavaScript API support, and fallback strategies across browsers
+---
+
+Understanding browser support helps you choose the right animation techniques and implement appropriate fallbacks.
+
+## CSS animation support
+
+CSS animations and transforms have excellent browser support.
+
+### Core features (100% support)
+
+<CardGroup cols={2}>
+  <Card title="CSS Transitions" icon="arrows-left-right">
+    Supported in all modern browsers since 2012
+  </Card>
+  <Card title="CSS Animations" icon="film">
+    @keyframes and animation properties universally supported
+  </Card>
+  <Card title="2D Transforms" icon="rotate">
+    translate, rotate, scale, skew - full support
+  </Card>
+  <Card title="Opacity" icon="eye">
+    Opacity transitions work everywhere
+  </Card>
+</CardGroup>
+
+### Advanced features
+
+| Feature | Chrome | Firefox | Safari | Edge |
+|---------|---------|---------|---------|------|
+| 3D Transforms | ✅ All | ✅ All | ✅ All | ✅ All |
+| will-change | ✅ 36+ | ✅ 36+ | ✅ 9.1+ | ✅ 79+ |
+| prefers-reduced-motion | ✅ 74+ | ✅ 63+ | ✅ 10.1+ | ✅ 79+ |
+| scroll-timeline | ✅ 115+ | ⚠️ Flag | ❌ No | ✅ 115+ |
+
+### Vendor prefixes (legacy)
+
+Modern browsers don't need prefixes, but for older browser support:
+
+```css
+.element {
+  -webkit-animation: slide 1s;  /* Safari < 9, Chrome < 43 */
+  animation: slide 1s;
+}
+
+@-webkit-keyframes slide {
+  from { -webkit-transform: translateX(0); }
+  to { -webkit-transform: translateX(100px); }
+}
+
+@keyframes slide {
+  from { transform: translateX(0); }
+  to { transform: translateX(100px); }
+}
+```
+
+<Info>
+  Tools like [Autoprefixer](https://autoprefixer.github.io/) automatically add vendor prefixes based on your browser support targets.
+</Info>
+
+## JavaScript API support
+
+### Web Animations API (WAAPI)
+
+```tsx
+element.animate(
+  [{ transform: 'translateX(0)' }, { transform: 'translateX(100px)' }],
+  { duration: 1000, easing: 'ease-out' }
+)
+```
+
+**Support:** Chrome 36+, Firefox 48+, Safari 13.1+, Edge 79+
+
+**Polyfill:** [web-animations-js](https://github.com/web-animations/web-animations-js)
+
+### requestAnimationFrame
+
+```tsx
+const animate = () => {
+  // Update animation state
+  requestAnimationFrame(animate)
+}
+requestAnimationFrame(animate)
+```
+
+**Support:** ✅ Universal support in all modern browsers
+
+### IntersectionObserver (scroll triggers)
+
+```tsx
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('animate')
+    }
+  })
+})
+```
+
+**Support:** Chrome 51+, Firefox 55+, Safari 12.1+, Edge 79+
+
+## Library compatibility
+
+Animation libraries used in the playground:
+
+### Framer Motion
+
+- **Browser support:** Chrome, Firefox, Safari, Edge (last 2 versions)
+- **Bundle size:** ~50KB minified
+- **Fallbacks:** Automatically disables complex features in unsupported browsers
+
+```json
+"browserslist": [
+  ">0.2%",
+  "not dead",
+  "not op_mini all"
+]
+```
+
+### GSAP (GreenSock)
+
+- **Browser support:** IE11+, all modern browsers
+- **Bundle size:** ~50KB for core
+- **Fallbacks:** Comprehensive legacy browser support built-in
+
+### React Spring
+
+- **Browser support:** Same as React (IE11+ with polyfills)
+- **Bundle size:** ~35KB
+- **Fallbacks:** Works with interpolation in older browsers
+
+## Feature detection
+
+Test for support before using advanced features:
+
+### CSS feature detection
+
+```tsx
+const supportsTransform = CSS.supports('transform', 'translateX(10px)')
+const supportsBackdropFilter = CSS.supports('backdrop-filter', 'blur(10px)')
+
+if (supportsTransform) {
+  // Use transform animations
+} else {
+  // Fallback to position animations
+}
+```
+
+### Intersection Observer detection
+
+```tsx
+if ('IntersectionObserver' in window) {
+  // Use IntersectionObserver for scroll animations
+  const observer = new IntersectionObserver(callback)
+} else {
+  // Fallback to scroll event listeners
+  window.addEventListener('scroll', handleScroll)
+}
+```
+
+### Reduced motion preference
+
+```tsx
+const prefersReducedMotion = window.matchMedia(
+  '(prefers-reduced-motion: reduce)'
+).matches
+
+if (prefersReducedMotion) {
+  // Disable or simplify animations
+}
+```
+
+## Fallback strategies
+
+<Tabs>
+  <Tab title="Progressive enhancement">
+    Start with basic functionality, add animations as enhancement:
+    
+    ```css
+    .card {
+      /* Base styles - work everywhere */
+      padding: 1rem;
+      background: white;
+    }
+    
+    @media (prefers-reduced-motion: no-preference) {
+      .card {
+        /* Enhanced: Add smooth transitions */
+        transition: transform 0.3s ease;
+      }
+      
+      .card:hover {
+        transform: translateY(-4px);
+      }
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Graceful degradation">
+    Build full experience, ensure it degrades gracefully:
+    
+    ```tsx
+    const hasAnimationSupport = 
+      CSS.supports('animation', 'spin 1s') &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    
+    return (
+      <motion.div
+        animate={hasAnimationSupport ? { scale: 1.2 } : {}}
+        transition={hasAnimationSupport ? { duration: 0.3 } : { duration: 0 }}
+      >
+        Content
+      </motion.div>
+    )
+    ```
+  </Tab>
+  
+  <Tab title="Polyfills">
+    Load polyfills for missing features:
+    
+    ```tsx
+    // Load Web Animations API polyfill if needed
+    if (!Element.prototype.animate) {
+      import('web-animations-js')
+    }
+    
+    // Load IntersectionObserver polyfill if needed  
+    if (!('IntersectionObserver' in window)) {
+      import('intersection-observer')
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Testing across browsers
+
+<Steps>
+  <Step title="Use browser DevTools">
+    Chrome DevTools → More Tools → Rendering → Emulate CSS media features
+    
+    Test `prefers-reduced-motion` without changing OS settings.
+  </Step>
+  
+  <Step title="BrowserStack/Sauce Labs">
+    Test on real devices and browser versions:
+    - iOS Safari (especially important - has quirks)
+    - Android Chrome
+    - Legacy browsers if needed
+  </Step>
+  
+  <Step title="Can I Use">
+    Check [caniuse.com](https://caniuse.com) for specific feature support:
+    - CSS animations
+    - Transform 3D
+    - Web Animations API
+    - IntersectionObserver
+  </Step>
+</Steps>
+
+## Common browser-specific issues
+
+### Safari
+
+<Warning>
+  Safari requires `-webkit-` prefix for some 3D transform properties. Also has quirks with `will-change` and backdrop-filter.
+</Warning>
+
+```css
+.element {
+  -webkit-backface-visibility: hidden;  /* Safari */
+  backface-visibility: hidden;
+}
+```
+
+### iOS Safari
+
+- Scroll animations may not work in iframes
+- Fixed positioning with transforms can be glitchy
+- Hardware limits on number of simultaneous animations
+
+### Firefox
+
+- Older versions had issues with large blur() values
+- Some 3D transform performance differences
+
+## Next.js deployment (Vercel)
+
+The Animation Playground is a Next.js app optimized for Vercel:
+
+```json
+// vercel.json
+{
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "cleanUrls": true
+}
+```
+
+**Browser support target:**
+
+```json
+// package.json
+"browserslist": [
+  ">0.2%",
+  "not dead",
+  "not ie 11",
+  "not op_mini all"
+]
+```
+
+## Recommendations
+
+<CardGroup cols={2}>
+  <Card title="Modern browsers" icon="check">
+    Use all features freely - transform, opacity, Web Animations API, etc.
+  </Card>
+  <Card title="Respect user preferences" icon="universal-access">
+    Always check prefers-reduced-motion and provide alternatives
+  </Card>
+  <Card title="Test on mobile" icon="mobile">
+    iOS Safari can behave differently than desktop Safari
+  </Card>
+  <Card title="Monitor bundle size" icon="weight-scale">
+    Animation libraries add significant KB - use tree-shaking
+  </Card>
+</CardGroup>
+
+## Related
+
+- [Accessibility](/reference/accessibility)
+- [Optimization](/reference/optimization)
+- [Performance concepts](/concepts/performance)

@@ -1,0 +1,225 @@
+---
+title: JavaScript animations
+description: Create dynamic, interactive animations using requestAnimationFrame, GSAP, and Canvas for complete control over animation timing and behavior
+---
+
+JavaScript animations give you full control over timing, easing, and dynamic behavior. They're essential for complex interactions and data-driven animations.
+
+## requestAnimationFrame
+
+The foundation of smooth JavaScript animations. It synchronizes with the browser's refresh rate for optimal performance.
+
+### Basic pattern
+
+```tsx
+const animate = (timestamp: number) => {
+  if (!startTime) startTime = timestamp
+  const progress = (timestamp - startTime) / duration
+  
+  element.style.transform = `translateX(${Math.sin(progress * Math.PI * 2) * distance}px)`
+  
+  if (progress < 1) {
+    requestAnimationFrame(animate)
+  }
+}
+
+requestAnimationFrame(animate)
+```
+
+### Complete example
+
+Here's a real implementation from the Animation Playground:
+
+```tsx
+const animate = (timestamp: number) => {
+  if (!startTimeRef.current) startTimeRef.current = timestamp
+  const progress = (timestamp - startTimeRef.current) / 2000 
+  
+  if (boxRef.current) {
+    const distance = getAnimationDistance();
+    boxRef.current.style.transform = `translateX(${Math.sin(progress * Math.PI * 2) * distance}px)`
+  }
+
+  if (progress < 1 && isRAFRunning) {
+    rafIdRef.current = requestAnimationFrame(animate)
+  } else {
+    setIsRAFRunning(false)
+    startTimeRef.current = null
+  }
+}
+```
+
+### Cleanup
+
+Always clean up animation frames to prevent memory leaks:
+
+```tsx
+useEffect(() => {
+  if (isRAFRunning) {
+    rafIdRef.current = requestAnimationFrame(animate)
+  }
+
+  return () => {
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current)
+    }
+  }
+}, [isRAFRunning])
+```
+
+## GSAP animations
+
+GSAP (GreenSock Animation Platform) is a professional-grade animation library that makes complex animations simple and performant.
+
+### Basic usage
+
+```tsx
+gsap.to(element, {
+  rotation: 360,
+  scale: 1.5,
+  duration: 1,
+  yoyo: true,
+  repeat: 1,
+  ease: "power2.inOut"
+})
+```
+
+### Complete example
+
+```tsx
+const startGSAPAnimation = () => {
+  if (!boxRef.current) return
+  setIsGSAPRunning(true)
+  
+  gsap.to(boxRef.current, {
+    rotation: 360,
+    scale: 1.5,
+    duration: 1,
+    yoyo: true,
+    repeat: 1,
+    ease: "power2.inOut",
+    onComplete: () => setIsGSAPRunning(false)
+  })
+}
+```
+
+### GSAP advantages
+
+- Simple, intuitive API
+- Excellent performance
+- Rich easing options
+- Timeline sequencing
+- Plugin ecosystem
+
+## Canvas animations
+
+Canvas provides a low-level API for drawing graphics and creating complex animations. Perfect for particle effects, games, and data visualizations.
+
+### Particle system
+
+```tsx
+const animate = () => {
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'
+  ctx.fillRect(0, 0, width, height)
+  
+  particles.forEach(particle => {
+    particle.x += particle.vx
+    particle.y += particle.vy
+    
+    ctx.beginPath()
+    ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
+    ctx.fill()
+  })
+  
+  requestAnimationFrame(animate)
+}
+```
+
+### Complete implementation
+
+```tsx
+useEffect(() => {
+  const canvas = canvasRef.current
+  if (!canvas) return
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  let particles: Array<{
+    x: number
+    y: number
+    radius: number
+    color: string
+    vx: number
+    vy: number
+  }> = []
+
+  const createParticles = () => {
+    particles = []
+    for (let i = 0; i < 50; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 4 + 2,
+        color: `hsl(${Math.random() * 360}, 50%, 50%)`,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2
+      })
+    }
+  }
+
+  const animate = () => {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    particles.forEach(particle => {
+      particle.x += particle.vx
+      particle.y += particle.vy
+
+      if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1
+      if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1
+
+      ctx.beginPath()
+      ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
+      ctx.fillStyle = particle.color
+      ctx.fill()
+    })
+
+    requestAnimationFrame(animate)
+  }
+
+  createParticles()
+  animate()
+}, [])
+```
+
+## When to use JavaScript over CSS
+
+Choose JavaScript animations when you need:
+
+- **Dynamic values**: Animation parameters that change based on user input or application state
+- **Complex timing**: Sequenced animations or precise timing control
+- **User interaction**: Animations that respond to mouse position, drag gestures, or scroll
+- **Conditional logic**: Animations that branch based on conditions
+- **Physics simulation**: Realistic motion with gravity, friction, or spring physics
+- **Canvas rendering**: Particle systems, custom graphics, or data visualizations
+
+## Performance tips
+
+- Use `requestAnimationFrame` instead of `setInterval` or `setTimeout`
+- Cache DOM queries outside the animation loop
+- Use transforms for position and scale changes
+- Debounce resize events when recalculating animation parameters
+- Profile with browser DevTools to identify bottlenecks
+
+## Responsive animations
+
+```tsx
+const getAnimationDistance = () => {
+  if (!containerRef.current) return 50;
+  const containerWidth = containerRef.current.clientWidth;
+  return Math.min(containerWidth * 0.25, 100);
+}
+```
+
+This pattern ensures animations scale appropriately across different screen sizes.
